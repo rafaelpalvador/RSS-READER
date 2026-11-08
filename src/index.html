@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leitura</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f3ee; --bg2:#ece9e1; --card:#ffffff; --ink:#16141b; --ink2:#4a4652; --muted:#8b8693;
+  --line:rgba(22,20,27,.08); --accent:#ff5b36; --accent2:#7b5cff; --accent-soft:rgba(255,91,54,.12);
+  --glass:rgba(255,255,255,.72); --shadow:0 1px 2px rgba(22,20,27,.04),0 8px 24px rgba(22,20,27,.06);
+  --read-size:19px; --radius:20px;
+}
+[data-theme="dark"]{
+  --bg:#0e0d12; --bg2:#17151d; --card:#1b1922; --ink:#f2eff7; --ink2:#c4bfcd; --muted:#8a8494;
+  --line:rgba(255,255,255,.08); --accent:#ff7a59; --accent2:#9d86ff; --accent-soft:rgba(255,122,89,.15);
+  --glass:rgba(23,21,29,.75); --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
+}
+[data-theme="sepia"]{
+  --bg:#f3ead8; --bg2:#eadfc8; --card:#fbf5e8; --ink:#3a2e22; --ink2:#5c4c3c; --muted:#93806b;
+  --line:rgba(58,46,34,.1); --accent:#c2552d; --accent2:#7a5a9c; --accent-soft:rgba(194,85,45,.12);
+  --glass:rgba(251,245,232,.8);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Manrope,system-ui,sans-serif;font-size:15px;line-height:1.5;transition:background .3s,color .3s}
+.app{max-width:680px;margin:0 auto;min-height:100vh;padding:0 18px 110px}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,textarea{font:inherit;width:100%;padding:13px 15px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);outline:none;transition:border .2s}
+input:focus,textarea:focus{border-color:var(--accent)}
+textarea{min-height:140px;resize:vertical}
+.serif{font-family:Newsreader,Georgia,serif}
+
+/* header */
+header{display:flex;align-items:center;justify-content:space-between;padding:22px 0 8px}
+.hello small{display:block;color:var(--muted);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.hello h1{margin:2px 0 0;font-family:Newsreader,serif;font-weight:500;font-size:30px;letter-spacing:-.6px}
+.hdr-actions{display:flex;gap:8px}
+.ibtn{width:42px;height:42px;border-radius:14px;background:var(--card);box-shadow:var(--shadow);display:grid;place-items:center;font-size:17px;transition:transform .15s}
+.ibtn:active{transform:scale(.92)}
+.ibtn svg{width:19px;height:19px}
+
+/* search */
+.search{position:relative;margin:10px 0 4px;display:none}
+.search.open{display:block}
+.search input{padding-left:42px}
+.search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;color:var(--muted)}
+
+/* chips & segmented */
+.chips{display:flex;gap:8px;overflow-x:auto;padding:12px 0 6px;scrollbar-width:none;margin:0 -18px;padding-left:18px;padding-right:18px}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;padding:8px 14px;border-radius:99px;background:var(--card);box-shadow:var(--shadow);font-size:13px;font-weight:600;color:var(--ink2);white-space:nowrap;transition:all .2s}
+.chip.on{background:var(--ink);color:var(--bg)}
+.seg{display:flex;background:var(--bg2);border-radius:14px;padding:4px;margin:10px 0}
+.seg button{flex:1;padding:9px 0;border-radius:11px;font-size:13px;font-weight:700;color:var(--muted);transition:all .2s}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:var(--shadow)}
+
+/* section titles */
+.sec{display:flex;align-items:baseline;justify-content:space-between;margin:26px 0 12px}
+.sec h2{margin:0;font-family:Newsreader,serif;font-weight:500;font-size:23px;letter-spacing:-.3px}
+.sec span{color:var(--muted);font-size:13px;font-weight:600}
+.sub{color:var(--muted);font-size:14px;margin:-4px 0 14px}
+
+/* hero briefing */
+.hero{position:relative;border-radius:26px;overflow:hidden;color:#fff;min-height:250px;display:flex;flex-direction:column;justify-content:flex-end;padding:22px;cursor:pointer;box-shadow:0 20px 40px -18px rgba(0,0,0,.45);transition:transform .2s}
+.hero:active{transform:scale(.985)}
+.hero .bgfx{position:absolute;inset:0;z-index:0}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 20%,rgba(0,0,0,.65));z-index:1}
+.hero > *:not(.bgfx){position:relative;z-index:2}
+.hero .tag{display:inline-flex;align-self:flex-start;gap:6px;align-items:center;background:rgba(255,255,255,.2);backdrop-filter:blur(10px);padding:6px 11px;border-radius:99px;font-size:12px;font-weight:700;margin-bottom:auto}
+.hero h3{font-family:Newsreader,serif;font-weight:500;font-size:27px;line-height:1.15;margin:60px 0 8px;letter-spacing:-.4px}
+.hero p{margin:0;opacity:.85;font-size:14px}
+.brief{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:6px 18px;margin-top:12px}
+.brief-item{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.brief-item:last-child{border-bottom:none}
+.brief-item .n{font-family:Newsreader,serif;font-size:26px;color:var(--accent);line-height:1;min-width:20px}
+.brief-item b{display:block;font-size:14.5px;line-height:1.35}
+.brief-item small{color:var(--muted);font-size:12px}
+
+/* article cards */
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:12px;overflow:hidden}
+.art{display:flex;gap:14px;padding:14px;cursor:pointer;transition:transform .15s;position:relative}
+.art:active{transform:scale(.985)}
+.art.read .art-body{opacity:.55}
+.thumb{flex:none;width:84px;height:84px;border-radius:16px;position:relative;overflow:hidden;display:grid;place-items:center;color:#fff;font-family:Newsreader,serif;font-size:34px}
+.thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.art-body{flex:1;min-width:0;display:flex;flex-direction:column}
+.src{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--ink2)}
+.dot{width:8px;height:8px;border-radius:50%;flex:none}
+.art h3{margin:5px 0 4px;font-size:16px;line-height:1.3;font-weight:700;letter-spacing:-.2px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.foot{display:flex;align-items:center;gap:10px;margin-top:auto;padding-top:6px;color:var(--muted);font-size:12px;font-weight:600}
+.foot .sp{flex:1}
+.ring{--p:0;width:30px;height:30px;border-radius:50%;background:conic-gradient(var(--accent) calc(var(--p)*1%),var(--bg2) 0);display:grid;place-items:center;font-size:10px;font-weight:800;color:var(--ink)}
+.ring::before{content:attr(data-v);width:24px;height:24px;border-radius:50%;background:var(--card);display:grid;place-items:center}
+.bm{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;color:var(--muted)}
+.bm.on{color:var(--accent)}
+.bm svg{width:18px;height:18px}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.tg{font-size:11px;font-weight:700;padding:3px 8px;border-radius:99px;background:var(--accent-soft);color:var(--accent)}
+.tg.prio{background:var(--accent);color:#fff}
+
+/* nav */
+nav{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;width:calc(100% - 28px);max-width:520px;background:var(--glass);backdrop-filter:blur(20px) saturate(1.6);-webkit-backdrop-filter:blur(20px) saturate(1.6);border:1px solid var(--line);border-radius:24px;display:flex;padding:6px;z-index:10;box-shadow:0 10px 40px -10px rgba(0,0,0,.25)}
+nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0;border-radius:18px;font-size:10.5px;font-weight:700;color:var(--muted);transition:all .2s}
+nav button svg{width:21px;height:21px}
+nav button.on{color:var(--ink);background:var(--card);box-shadow:var(--shadow)}
+nav button.on svg{color:var(--accent)}
+
+/* list rows */
+.rows{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:4px 16px}
+.rowi{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--line)}
+.rowi:last-child{border-bottom:none}
+.rowi .grow{flex:1;min-width:0}
+.rowi b{font-size:14.5px}
+.rowi small{display:block;color:var(--muted);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.av{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;color:#fff;font-weight:800;flex:none;font-size:15px}
+.pill{padding:8px 13px;border-radius:12px;font-size:13px;font-weight:700;background:var(--bg2);color:var(--ink);white-space:nowrap}
+.pill.acc{background:var(--accent);color:#fff}
+.pill.done{background:var(--accent-soft);color:var(--accent)}
+.x{color:var(--muted);font-size:20px;padding:4px 6px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 18px;border-radius:15px;font-weight:700;background:var(--ink);color:var(--bg);transition:transform .15s}
+.btn:active{transform:scale(.97)}
+.btn.acc{background:var(--accent);color:#fff}
+.btn.soft{background:var(--card);color:var(--ink);box-shadow:var(--shadow)}
+.btn.block{width:100%}
+.inline{display:flex;gap:8px}
+.inline input{flex:1}
+.note{display:flex;gap:10px;font-size:13px;color:var(--ink2);background:var(--accent-soft);border-radius:14px;padding:12px 14px;margin:12px 0}
+.empty{text-align:center;color:var(--muted);padding:40px 20px}
+.empty .big{font-size:40px;margin-bottom:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cat{border-radius:18px;padding:16px;color:#fff;min-height:96px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;transition:transform .15s}
+.cat:active{transform:scale(.97)}
+.cat b{font-size:15px}
+.cat small{opacity:.85;font-size:12px;font-weight:600}
+
+/* stats */
+.hbar{padding:10px 0}
+.hbar .t{display:flex;justify-content:space-between;font-size:13.5px;font-weight:600;margin-bottom:6px}
+.hbar .tr{height:8px;border-radius:99px;background:var(--bg2);overflow:hidden}
+.hbar .tr i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+
+/* reader */
+.reader{position:fixed;inset:0;background:var(--bg);z-index:20;overflow-y:auto;transform:translateY(100%);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.reader.open{transform:none}
+.progress{position:sticky;top:0;height:3px;background:transparent;z-index:3}
+.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.rbar{position:sticky;top:3px;z-index:2;display:flex;justify-content:space-between;align-items:center;padding:10px 16px;max-width:720px;margin:0 auto}
+.rbar .grp{display:flex;gap:8px}
+.rwrap{max-width:680px;margin:0 auto;padding:4px 22px 120px}
+.rcover{height:200px;border-radius:24px;position:relative;overflow:hidden;margin-bottom:22px}
+.rcover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.rmeta{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--ink2);flex-wrap:wrap}
+.rwrap h1{font-family:Newsreader,serif;font-weight:500;font-size:34px;line-height:1.12;letter-spacing:-.6px;margin:12px 0 18px}
+.box{border-radius:20px;padding:18px 20px;margin:18px 0}
+.box h4{margin:0 0 10px;font-size:11.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.box.sum{background:var(--card);box-shadow:var(--shadow)}
+.box.sum h4{color:var(--accent)}
+.box.sum ul{margin:0;padding:0;list-style:none}
+.box.sum li{position:relative;padding-left:22px;margin:9px 0;font-size:15.5px;line-height:1.5}
+.box.sum li::before{content:"";position:absolute;left:4px;top:9px;width:7px;height:7px;border-radius:50%;background:var(--accent)}
+.box.ans{background:linear-gradient(135deg,var(--accent-soft),rgba(123,92,255,.12))}
+.box.ans h4{color:var(--accent2)}
+.box.ans .q{font-weight:800;font-size:13.5px;margin-top:10px}
+.box.ans .q:first-of-type{margin-top:0}
+.box.ans .a{font-family:Newsreader,serif;font-size:17px;line-height:1.5;margin-top:2px}
+.rbody{font-family:Newsreader,serif;font-size:var(--read-size);line-height:1.72;color:var(--ink)}
+.rbody p{margin:0 0 1.1em}
+.rbody p:first-child::first-letter{font-size:3.2em;float:left;line-height:.9;margin:6px 8px 0 0;color:var(--accent);font-weight:500}
+mark.kw{background:none;color:inherit;box-shadow:inset 0 -.38em 0 var(--accent-soft)}
+mark.hl{background:rgba(255,214,10,.45);color:inherit;border-radius:3px;padding:0 1px}
+[data-theme="dark"] mark.hl{background:rgba(255,214,10,.3)}
+.divider{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin:28px 0 16px}
+.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--line)}
+.related{display:flex;gap:10px;overflow-x:auto;margin:0 -22px;padding:0 22px 10px;scrollbar-width:none}
+.related .rc{flex:none;width:220px;background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:14px;cursor:pointer}
+.related .rc b{display:block;font-size:14px;line-height:1.35;margin-top:6px}
+.hlbtn{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(120px);background:var(--ink);color:var(--bg);padding:13px 20px;border-radius:99px;font-weight:800;z-index:25;box-shadow:0 10px 30px rgba(0,0,0,.3);transition:transform .25s}
+.hlbtn.show{transform:translateX(-50%)}
+
+/* highlights */
+.hlcard{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 18px 14px;margin-bottom:12px;border-left:4px solid #ffd60a}
+.hlcard q{font-family:Newsreader,serif;font-size:17px;line-height:1.5;display:block;quotes:"“" "”"}
+.hlcard .from{display:flex;align-items:center;justify-content:space-between;margin-top:10px;color:var(--muted);font-size:12px;font-weight:600}
+
+/* sheet & toast */
+.modal{position:fixed;inset:0;background:rgba(10,8,14,.5);backdrop-filter:blur(4px);z-index:40;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+.modal.open{opacity:1;pointer-events:auto}
+.sheet{background:var(--bg);width:100%;max-width:680px;border-radius:28px 28px 0 0;padding:10px 20px 28px;max-height:88vh;overflow-y:auto;transform:translateY(40px);transition:transform .3s}
+.modal.open .sheet{transform:none}
+.grab{width:40px;height:5px;border-radius:99px;background:var(--line);margin:4px auto 14px}
+.sheet h2{font-family:Newsreader,serif;font-weight:500;font-size:25px;margin:0 0 4px}
+.stack > * + *{margin-top:10px}
+.opts{display:flex;gap:8px}
+.opts button{flex:1;padding:12px 0;border-radius:14px;background:var(--card);box-shadow:var(--shadow);font-weight:700;font-size:13px}
+.opts button.on{outline:2px solid var(--accent)}
+.toast{position:fixed;top:18px;left:50%;transform:translateX(-50%) translateY(-90px);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:16px;font-size:14px;font-weight:600;transition:transform .3s;z-index:60;max-width:92%;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.toast.show{transform:translateX(-50%)}
+.fade{animation:fade .35s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+label.file{display:block;cursor:pointer}
+label.file input{display:none}
+
+/* hero v3 */
+.hero{min-height:340px;padding:20px 22px 22px;border-radius:30px}
+.hero::after{background:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.1) 35%,rgba(0,0,0,.72) 100%)}
+.hero .grain{opacity:.22;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.hero-top{display:flex;justify-content:space-between;margin-bottom:auto}
+.hero .tag{margin:0}
+.hero .tag.ghost{background:rgba(0,0,0,.2)}
+.hero h3{font-size:30px;margin:90px 0 10px}
+.hero p{font-family:Newsreader,serif;font-size:16.5px;line-height:1.45;opacity:.9;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.hero-src{display:flex;align-items:center;gap:7px;margin-top:14px;font-size:12.5px;font-weight:700;opacity:.9}
+/* carousel */
+.carousel{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -18px;padding:2px 18px 14px;scrollbar-width:none}
+.carousel::-webkit-scrollbar{display:none}
+.mcard{flex:none;width:200px;scroll-snap-align:start;background:var(--card);border-radius:22px;box-shadow:var(--shadow);overflow:hidden;cursor:pointer;transition:transform .15s}
+.mcard:active{transform:scale(.97)}
+.mcover{height:118px;position:relative;display:grid;place-items:center;color:rgba(255,255,255,.9);font-family:Newsreader,serif;font-size:44px}
+.mcover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.mbody{padding:12px 14px 16px}
+.mbody b{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin-top:6px;font-family:Newsreader,serif;font-weight:500;font-size:17px;line-height:1.28}
+/* editorial list */
+.group-h{font-size:11.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:22px 4px 10px}
+.elist{background:var(--card);border-radius:24px;box-shadow:var(--shadow);padding:2px 18px}
+.erow{display:flex;gap:16px;padding:18px 0;border-bottom:1px solid var(--line);cursor:pointer;align-items:flex-start}
+.erow:last-child{border-bottom:none}
+.erow:active{opacity:.7}
+.erow.read .etext h3{color:var(--muted)}
+.erow.read .thumb{filter:grayscale(.6);opacity:.7}
+.etext{flex:1;min-width:0;display:flex;flex-direction:column}
+.etext .src .when{color:var(--muted);font-weight:600;margin-left:auto}
+.erow h3{margin:7px 0 10px;font-family:Newsreader,serif;font-weight:500;font-size:19px;line-height:1.25;letter-spacing:-.2px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.erow .thumb{width:88px;height:88px;border-radius:18px;font-size:32px;margin-top:4px}
+.erow .foot{padding-top:0;min-width:0}
+.why{font-size:12px;font-weight:700;color:var(--accent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:0 1 auto}
+.why.prio{background:var(--accent);color:#fff;padding:3px 9px;border-radius:99px}
+.end{display:flex;flex-direction:column;align-items:center;gap:4px;padding:36px 20px 20px;text-align:center;color:var(--muted)}
+.end span{font-size:26px;color:var(--accent);opacity:.7}
+.end b{font-family:Newsreader,serif;font-weight:500;font-size:20px;color:var(--ink)}
+.end small{font-size:13px}
+nav{max-width:440px}
+
+/* países & descobrir */
+.fl{font-size:13px}
+.seg button{font-size:12.5px}
+.country{background:var(--card);border-radius:24px;box-shadow:var(--shadow);padding:6px 16px 10px;margin-bottom:14px}
+.chead{display:flex;align-items:center;gap:12px;padding:12px 0 10px;border-bottom:1px solid var(--line)}
+.chead .flag{font-size:34px;line-height:1}
+.chead .grow{flex:1;min-width:0}
+.chead b{font-family:Newsreader,serif;font-weight:500;font-size:21px;display:block;line-height:1.1}
+.chead small{color:var(--muted);font-size:12px;font-weight:600}
+.orow{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--line);align-items:flex-start}
+.orow:last-of-type{border-bottom:none}
+.orow .grow{flex:1;min-width:0}
+.orow b{font-size:15px}
+.orow p{margin:2px 0 6px;color:var(--ink2);font-size:13.5px;line-height:1.4}
+.otags{display:flex;gap:6px;flex-wrap:wrap}
+.otags span{font-size:11px;font-weight:700;color:var(--muted);background:var(--bg2);padding:3px 8px;border-radius:99px}
+.gem{font-size:13px}
+.followall{width:100%;padding:12px;border-radius:14px;background:var(--bg2);font-weight:700;font-size:13px;margin:6px 0 4px}
+.gcard{flex:none;width:230px;scroll-snap-align:start;border-radius:24px;padding:16px;color:#fff;display:flex;flex-direction:column;min-height:220px;position:relative;overflow:hidden}
+.gcard::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 30%,rgba(0,0,0,.35))}
+.gcard > *{position:relative;z-index:1}
+.gtop{display:flex;justify-content:space-between;align-items:center;margin-bottom:auto}
+.gflag{font-size:28px}
+.gtype{font-size:11px;font-weight:800;background:rgba(255,255,255,.2);padding:4px 9px;border-radius:99px;backdrop-filter:blur(8px)}
+.gcard b{font-family:Newsreader,serif;font-weight:500;font-size:22px;margin-top:30px;line-height:1.15}
+.gcard p{font-size:13px;opacity:.9;margin:6px 0 12px;line-height:1.4}
+.gbtn{align-self:flex-start;background:#fff;color:#16141b;padding:8px 16px;border-radius:99px;font-weight:800;font-size:13px}
+.gbtn.done{background:rgba(255,255,255,.25);color:#fff}
+.flaggrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.ftile{background:var(--card);box-shadow:var(--shadow);border-radius:18px;padding:12px 4px 10px;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11.5px;font-weight:700;color:var(--ink2);position:relative}
+.ftile span{font-size:30px;line-height:1}
+.ftile.on{outline:2px solid var(--accent)}
+.ftile i{position:absolute;top:6px;right:8px;font-style:normal;color:var(--accent);font-size:12px}
+
+.ct{background:var(--accent-soft)!important;color:var(--accent)!important}
+.feat{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.ftbig{border-radius:24px;padding:16px;color:#fff;text-align:left;display:flex;flex-direction:column;gap:2px;min-height:150px;position:relative;overflow:hidden;transition:transform .15s}
+.ftbig:active{transform:scale(.97)}
+.ftbig.br{background:radial-gradient(120% 100% at 0% 0%,#1fbf6a,transparent 60%),linear-gradient(135deg,#0f8f4f,#0a3d8f)}
+.ftbig.eu{background:radial-gradient(120% 100% at 100% 0%,#ffcc00aa,transparent 55%),linear-gradient(135deg,#1d3fbf,#0b1f6b)}
+.ftbig span{font-size:34px;margin-bottom:auto}
+.ftbig b{font-family:Newsreader,serif;font-weight:500;font-size:26px;margin-top:18px}
+.ftbig small{font-size:12px;opacity:.9;line-height:1.35}
+.websec{background:var(--card);border-radius:24px;box-shadow:var(--shadow);padding:6px 16px 8px;margin-bottom:14px;border:1.5px dashed var(--accent-soft)}
+.wh{display:flex;align-items:center;gap:12px;padding:10px 0}
+.wh > span{font-size:26px}
+.wh .grow{flex:1;min-width:0}
+.wh b{display:block}
+.wh small{color:var(--muted);font-size:12.5px}
+.wload{display:flex;gap:6px;justify-content:center;padding:14px}
+.wload i{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:bl 1s infinite}
+.wload i:nth-child(2){animation-delay:.15s}.wload i:nth-child(3){animation-delay:.3s}
+@keyframes bl{0%,100%{opacity:.2}50%{opacity:1}}
+.is-app .proto{display:none}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="hello"><small id="today"></small><h1 id="greet">Olá</h1></div>
+    <div class="hdr-actions">
+      <button class="ibtn" id="searchBtn" title="Pesquisar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+      <button class="ibtn" id="refreshBtn" title="Atualizar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5"/></svg></button>
+      <button class="ibtn" id="settingsBtn" title="Ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
+    </div>
+  </header>
+  <div class="search" id="searchBox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" placeholder="Pesquisar em todos os artigos…"></div>
+  <main id="view"></main>
+</div>
+
+<nav id="nav">
+  <button data-tab="hoje" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h8M8 17h4"/></svg>Hoje</button>
+  <button data-tab="fontes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 11a8 8 0 0 1 8 8M5 5a14 14 0 0 1 14 14"/><circle cx="6" cy="18" r="1.5" fill="currentColor"/></svg>Feeds</button>
+  <button data-tab="interesses"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l2.4 5.6L20 9.3l-4.3 3.9L17 19l-5-3-5 3 1.3-5.8L4 9.3l5.6-.7z"/></svg>Interesses</button>
+  <button data-tab="biblioteca"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"/></svg>Biblioteca</button>
+</nav>
+
+<div class="reader" id="reader">
+  <div class="progress"><i id="prog"></i></div>
+  <div class="rbar">
+    <button class="ibtn" data-close-reader title="Voltar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <div class="grp" id="rActions"></div>
+  </div>
+  <div class="rwrap" id="rwrap"></div>
+</div>
+<button class="hlbtn" id="hlBtn">✦ Destacar seleção</button>
+<div class="modal" id="modal"><div class="sheet"><div class="grab"></div><div id="sheet"></div></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= Dados ================= */
+const KEY = 'leitura-v1';
+const isApp = !!window.__TAURI__;
+const PALETTE = ['#ff5b36','#7b5cff','#13b38b','#f5a524','#2f80ed','#e0457b','#0ea5b7','#8a6d3b'];
+const uid = () => Math.random().toString(36).slice(2, 9);
+const DAY = 864e5;
+const dkey = t => new Date(t).toISOString().slice(0, 10);
+
+// ===== Diretório de jornais por país (links RSS escritos de memória — confirmar no app instalado) =====
+const REGIONS = ['Brasil', 'Europa', 'América Latina', 'América do Norte', 'África', 'Médio Oriente', 'Ásia', 'Oceânia', 'Internacional'];
+const COUNTRIES = {
+  PT: ['Portugal', 'Europa'], ES: ['Espanha', 'Europa'], FR: ['França', 'Europa'], DE: ['Alemanha', 'Europa'], IT: ['Itália', 'Europa'],
+  GB: ['Reino Unido', 'Europa'], IE: ['Irlanda', 'Europa'], NL: ['Países Baixos', 'Europa'], FI: ['Finlândia', 'Europa'], NO: ['Noruega', 'Europa'],
+  UA: ['Ucrânia', 'Europa'], EU: ['União Europeia', 'Europa'], BE: ['Bélgica', 'Europa'], SE: ['Suécia', 'Europa'], PL: ['Polónia', 'Europa'],
+  BR: ['Brasil', 'América Latina'], MX: ['México', 'América Latina'], AR: ['Argentina', 'América Latina'], CL: ['Chile', 'América Latina'], CO: ['Colômbia', 'América Latina'],
+  US: ['Estados Unidos', 'América do Norte'], CA: ['Canadá', 'América do Norte'],
+  ZA: ['África do Sul', 'África'], NG: ['Nigéria', 'África'], AO: ['Angola', 'África'], MZ: ['Moçambique', 'África'],
+  QA: ['Catar', 'Médio Oriente'], IL: ['Israel', 'Médio Oriente'],
+  JP: ['Japão', 'Ásia'], IN: ['Índia', 'Ásia'], HK: ['Hong Kong', 'Ásia'], SG: ['Singapura', 'Ásia'], PH: ['Filipinas', 'Ásia'], KR: ['Coreia do Sul', 'Ásia'],
+  AU: ['Austrália', 'Oceânia'], NZ: ['Nova Zelândia', 'Oceânia'],
+  INT: ['Internacional', 'Internacional']
+};
+const LANGS = { pt: 'Português', en: 'English', es: 'Español', fr: 'Français', de: 'Deutsch', it: 'Italiano', nl: 'Nederlands', fi: 'Suomi', no: 'Norsk', ja: '日本語', sv: 'Svenska' };
+const TYPE_COLOR = { 'Serviço público': '#2f80ed', 'Referência': '#16141b', 'Independente': '#13b38b', 'Investigação': '#7b5cff', 'Tecnologia': '#0ea5b7', 'Internacional': '#e0457b', 'Agência': '#f5a524' };
+const CATS = { geral: 'Geral', politica: 'Política', economia: 'Economia', financas: 'Finanças', esportes: 'Esportes', tecnologia: 'Tecnologia' };
+// [nome, país, língua, url, tipo, categorias, descrição, joia?]
+const OUTLETS = [
+  // ——— Brasil ———
+  ['g1', 'BR', 'pt', 'https://g1.globo.com/rss/g1/', 'Referência', 'geral', 'O portal de notícias do grupo Globo.'],
+  ['Folha de S.Paulo', 'BR', 'pt', 'https://feeds.folha.uol.com.br/emcimadahora/rss091.xml', 'Referência', 'geral,politica', 'Um dos maiores jornais do Brasil.'],
+  ['Estadão', 'BR', 'pt', 'https://www.estadao.com.br/arc/outboundfeeds/feeds/rss/sections/ultimas/', 'Referência', 'geral,politica', 'Jornal centenário de São Paulo.'],
+  ['UOL Notícias', 'BR', 'pt', 'https://rss.uol.com.br/feed/noticias.xml', 'Referência', 'geral', 'O maior portal brasileiro.'],
+  ['CNN Brasil', 'BR', 'pt', 'https://www.cnnbrasil.com.br/feed/', 'Referência', 'geral,politica', 'Notícias ao minuto da CNN no Brasil.'],
+  ['Agência Brasil', 'BR', 'pt', 'https://agenciabrasil.ebc.com.br/rss/ultimasnoticias/feed.xml', 'Serviço público', 'geral,politica', 'A agência pública de notícias (EBC).'],
+  ['BBC News Brasil', 'BR', 'pt', 'https://feeds.bbci.co.uk/portuguese/rss.xml', 'Serviço público', 'geral', 'A BBC em português.'],
+  ['Metrópoles', 'BR', 'pt', 'https://www.metropoles.com/feed', 'Referência', 'geral,politica', 'Portal de Brasília, forte nos bastidores do poder.'],
+  ['Poder360', 'BR', 'pt', 'https://www.poder360.com.br/feed/', 'Referência', 'politica', 'Política e governo em Brasília, com muitos dados.'],
+  ['g1 Política', 'BR', 'pt', 'https://g1.globo.com/rss/g1/politica/', 'Referência', 'politica', 'A secção de política do g1.'],
+  ['Congresso em Foco', 'BR', 'pt', 'https://congressoemfoco.uol.com.br/feed/', 'Independente', 'politica', 'Acompanha de perto o Congresso Nacional.', 1],
+  ['CartaCapital', 'BR', 'pt', 'https://www.cartacapital.com.br/feed/', 'Referência', 'politica', 'Revista semanal de política e sociedade.'],
+  ['The Intercept Brasil', 'BR', 'pt', 'https://www.intercept.com.br/feed/', 'Investigação', 'politica', 'Jornalismo de investigação sem medo de polémica.', 1],
+  ['Agência Pública', 'BR', 'pt', 'https://apublica.org/feed/', 'Investigação', 'politica', 'Investigação sem fins lucrativos.', 1],
+  ['g1 Economia', 'BR', 'pt', 'https://g1.globo.com/rss/g1/economia/', 'Referência', 'economia', 'A secção de economia do g1.'],
+  ['Folha Mercado', 'BR', 'pt', 'https://feeds.folha.uol.com.br/mercado/rss091.xml', 'Referência', 'economia,financas', 'Economia e mercado da Folha.'],
+  ['Exame', 'BR', 'pt', 'https://exame.com/feed/', 'Referência', 'economia,financas', 'Revista de negócios e economia.'],
+  ['InfoMoney', 'BR', 'pt', 'https://www.infomoney.com.br/feed/', 'Referência', 'financas', 'Bolsa, investimentos e finanças pessoais.'],
+  ['Money Times', 'BR', 'pt', 'https://www.moneytimes.com.br/feed/', 'Referência', 'financas', 'Mercado financeiro em tempo real.'],
+  ['Seu Dinheiro', 'BR', 'pt', 'https://www.seudinheiro.com/feed/', 'Independente', 'financas', 'Investimentos explicados de forma simples.', 1],
+  ['ge', 'BR', 'pt', 'https://ge.globo.com/rss/ge/', 'Referência', 'esportes', 'O portal de esportes da Globo.'],
+  ['Lance!', 'BR', 'pt', 'https://www.lance.com.br/feed', 'Referência', 'esportes', 'Futebol e esportes ao minuto.'],
+  ['Trivela', 'BR', 'pt', 'https://trivela.com.br/feed/', 'Independente', 'esportes', 'Futebol com análise e muita história.', 1],
+  ['Tecnoblog', 'BR', 'pt', 'https://tecnoblog.net/feed/', 'Tecnologia', 'tecnologia', 'Tecnologia com bom jornalismo.'],
+  ['Olhar Digital', 'BR', 'pt', 'https://olhardigital.com.br/feed/', 'Tecnologia', 'tecnologia', 'Tecnologia e ciência para todos.'],
+  ['Canaltech', 'BR', 'pt', 'https://canaltech.com.br/rss/', 'Tecnologia', 'tecnologia', 'Notícias, análises e dicas de tecnologia.'],
+  ['Tecmundo', 'BR', 'pt', 'https://rss.tecmundo.com.br/feed', 'Tecnologia', 'tecnologia', 'Um dos maiores sites de tecnologia do Brasil.'],
+  ['Diolinux', 'BR', 'pt', 'https://diolinux.com.br/feed', 'Tecnologia', 'tecnologia', 'Linux e software livre em português.', 1],
+  // ——— Portugal ———
+  ['Público', 'PT', 'pt', 'https://feeds.feedburner.com/PublicoRSS', 'Referência', 'geral,politica', 'Diário de referência, forte em sociedade e ciência.'],
+  ['Observador', 'PT', 'pt', 'https://observador.pt/feed/', 'Referência', 'geral,politica', 'Jornal digital com atualidade ao minuto.'],
+  ['Expresso', 'PT', 'pt', 'https://expresso.pt/rss', 'Referência', 'politica,economia', 'Semanário de análise política e económica.'],
+  ['Diário de Notícias', 'PT', 'pt', 'https://www.dn.pt/rss', 'Referência', 'geral', 'Um dos diários mais antigos do país.'],
+  ['Jornal de Notícias', 'PT', 'pt', 'https://www.jn.pt/rss', 'Referência', 'geral', 'O grande diário do Porto e do Norte.'],
+  ['RTP Notícias', 'PT', 'pt', 'https://www.rtp.pt/noticias/rss', 'Serviço público', 'geral,politica', 'A rádio e televisão pública.'],
+  ['Polígrafo', 'PT', 'pt', 'https://poligrafo.sapo.pt/feed', 'Independente', 'politica', 'Verificação de factos.', 1],
+  ['ECO', 'PT', 'pt', 'https://eco.sapo.pt/feed/', 'Referência', 'economia,financas', 'Economia, empresas e mercados.'],
+  ['Jornal de Negócios', 'PT', 'pt', 'https://www.jornaldenegocios.pt/rss', 'Referência', 'economia,financas', 'O diário económico de referência.'],
+  ['Record', 'PT', 'pt', 'https://www.record.pt/rss', 'Referência', 'esportes', 'Desporto, sobretudo futebol.'],
+  ['Maisfutebol', 'PT', 'pt', 'https://maisfutebol.iol.pt/rss', 'Referência', 'esportes', 'Futebol português e internacional.'],
+  ['Pplware', 'PT', 'pt', 'https://pplware.sapo.pt/feed/', 'Tecnologia', 'tecnologia', 'Notícias e guias de tecnologia.'],
+  ['Exame Informática', 'PT', 'pt', 'https://visao.pt/exameinformatica/feed/', 'Tecnologia', 'tecnologia', 'A revista de tecnologia da Visão.'],
+  ['Shifter', 'PT', 'pt', 'https://shifter.pt/feed/', 'Tecnologia', 'tecnologia', 'Tecnologia e cultura digital com olhar crítico.', 1],
+  ['Fumaça', 'PT', 'pt', 'https://fumaca.pt/feed/', 'Independente', 'politica', 'Jornalismo independente e sem publicidade.', 1],
+  ['Setenta e Quatro', 'PT', 'pt', 'https://setentaequatro.pt/feed', 'Investigação', 'politica', 'Investigação sobre poder e dinheiro.', 1],
+  ['Mensagem de Lisboa', 'PT', 'pt', 'https://amensagem.pt/feed/', 'Independente', 'geral', 'Histórias dos bairros de Lisboa.', 1],
+  // ——— Espanha ———
+  ['El País', 'ES', 'es', 'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada', 'Referência', 'geral,politica', 'O maior diário espanhol.'],
+  ['El Mundo', 'ES', 'es', 'https://e00-elmundo.uecdn.es/elmundo/rss/portada.xml', 'Referência', 'geral,politica', 'Diário generalista de Madrid.'],
+  ['elDiario.es', 'ES', 'es', 'https://www.eldiario.es/rss/', 'Independente', 'politica', 'Financiado pelos leitores.', 1],
+  ['Expansión', 'ES', 'es', 'https://e00-expansion.uecdn.es/rss/portada.xml', 'Referência', 'economia,financas', 'O diário económico espanhol.'],
+  ['Marca', 'ES', 'es', 'https://e00-marca.uecdn.es/rss/portada.xml', 'Referência', 'esportes', 'O desportivo mais lido de Espanha.'],
+  ['AS', 'ES', 'es', 'https://as.com/rss/tags/ultimas_noticias.xml', 'Referência', 'esportes', 'Futebol e desporto.'],
+  ['Xataka', 'ES', 'es', 'https://www.xataka.com/feedburner.xml', 'Tecnologia', 'tecnologia', 'O maior site de tecnologia em espanhol.'],
+  // ——— França ———
+  ['Le Monde', 'FR', 'fr', 'https://www.lemonde.fr/rss/une.xml', 'Referência', 'geral,politica', 'Diário francês de referência.'],
+  ['Le Figaro', 'FR', 'fr', 'https://www.lefigaro.fr/rss/figaro_actualites.xml', 'Referência', 'geral,politica', 'O diário mais antigo de França.'],
+  ['Libération', 'FR', 'fr', 'https://www.liberation.fr/arc/outboundfeeds/rss/?outputType=xml', 'Referência', 'politica', 'Diário de esquerda.'],
+  ['Les Echos', 'FR', 'fr', 'https://services.lesechos.fr/rss/les-echos-economie.xml', 'Referência', 'economia,financas', 'O diário económico francês.'],
+  ["L'Équipe", 'FR', 'fr', 'https://dwh.lequipe.fr/api/edito/rss?path=/', 'Referência', 'esportes', 'O desportivo francês.'],
+  ['France 24', 'FR', 'fr', 'https://www.france24.com/fr/rss', 'Serviço público', 'geral', 'Notícias internacionais, público.'],
+  ['Numerama', 'FR', 'fr', 'https://www.numerama.com/feed/', 'Tecnologia', 'tecnologia', 'Tecnologia e ciência.'],
+  // ——— Alemanha ———
+  ['Tagesschau', 'DE', 'de', 'https://www.tagesschau.de/xml/rss2/', 'Serviço público', 'geral,politica', 'O noticiário público alemão.'],
+  ['Der Spiegel', 'DE', 'de', 'https://www.spiegel.de/schlagzeilen/index.rss', 'Referência', 'geral,politica', 'Revista famosa pelas investigações.'],
+  ['Die Zeit', 'DE', 'de', 'https://newsfeed.zeit.de/index', 'Referência', 'politica', 'Semanário de análise.'],
+  ['FAZ', 'DE', 'de', 'https://www.faz.net/rss/aktuell/', 'Referência', 'politica,economia', 'Frankfurter Allgemeine Zeitung.'],
+  ['Handelsblatt', 'DE', 'de', 'https://www.handelsblatt.com/contentexport/feed/top-themen', 'Referência', 'economia,financas', 'O diário económico alemão.'],
+  ['kicker', 'DE', 'de', 'https://newsfeed.kicker.de/news/aktuell', 'Referência', 'esportes', 'A bíblia do futebol alemão.'],
+  ['DW', 'DE', 'en', 'https://rss.dw.com/rdf/rss-en-all', 'Serviço público', 'geral', 'A Deutsche Welle, em inglês.'],
+  ['heise online', 'DE', 'de', 'https://www.heise.de/rss/heise-atom.xml', 'Tecnologia', 'tecnologia', 'A referência alemã em tecnologia.'],
+  ['netzpolitik.org', 'DE', 'de', 'https://netzpolitik.org/feed/', 'Tecnologia', 'tecnologia,politica', 'Direitos digitais e privacidade.', 1],
+  // ——— Itália ———
+  ['Corriere della Sera', 'IT', 'it', 'https://xml2.corriereobjects.it/rss/homepage.xml', 'Referência', 'geral,politica', 'O maior diário italiano.'],
+  ['la Repubblica', 'IT', 'it', 'https://www.repubblica.it/rss/homepage/rss2.0.xml', 'Referência', 'geral,politica', 'Diário generalista de Roma.'],
+  ['Il Sole 24 Ore', 'IT', 'it', 'https://www.ilsole24ore.com/rss/italia.xml', 'Referência', 'economia,financas', 'O diário económico italiano.'],
+  ['La Gazzetta dello Sport', 'IT', 'it', 'https://www.gazzetta.it/rss/home.xml', 'Referência', 'esportes', 'O jornal cor-de-rosa do desporto.'],
+  ['Il Post', 'IT', 'it', 'https://www.ilpost.it/feed/', 'Independente', 'geral', 'Explica as notícias com calma.', 1],
+  // ——— Reino Unido & Irlanda ———
+  ['BBC News', 'GB', 'en', 'https://feeds.bbci.co.uk/news/rss.xml', 'Serviço público', 'geral,politica', 'O serviço público britânico.'],
+  ['The Guardian', 'GB', 'en', 'https://www.theguardian.com/world/rss', 'Referência', 'geral,politica', 'Gratuito, forte em mundo e ambiente.'],
+  ['Financial Times', 'GB', 'en', 'https://www.ft.com/rss/home', 'Referência', 'economia,financas', 'Economia e mercados mundiais (paywall).'],
+  ['The Economist', 'GB', 'en', 'https://www.economist.com/latest/rss.xml', 'Referência', 'economia,politica', 'Análise semanal do mundo (paywall).'],
+  ['BBC Sport', 'GB', 'en', 'https://feeds.bbci.co.uk/sport/rss.xml', 'Serviço público', 'esportes', 'Desporto da BBC.'],
+  ['Sky Sports', 'GB', 'en', 'https://www.skysports.com/rss/12040', 'Referência', 'esportes', 'Futebol e desporto britânico.'],
+  ['The Register', 'GB', 'en', 'https://www.theregister.com/headlines.atom', 'Tecnologia', 'tecnologia', 'Tecnologia com humor britânico.', 1],
+  ['The Conversation', 'GB', 'en', 'https://theconversation.com/uk/articles.atom', 'Independente', 'geral', 'Escrito por investigadores universitários.', 1],
+  ['RTÉ News', 'IE', 'en', 'https://www.rte.ie/news/rss/news-headlines.xml', 'Serviço público', 'geral', 'A emissora pública irlandesa.'],
+  // ——— Resto da Europa ———
+  ['NOS', 'NL', 'nl', 'https://feeds.nos.nl/nosnieuwsalgemeen', 'Serviço público', 'geral', 'Noticiário público neerlandês.'],
+  ['The Brussels Times', 'BE', 'en', 'https://www.brusselstimes.com/feed', 'Referência', 'geral,politica', 'A Bélgica e a UE em inglês.'],
+  ['SVT Nyheter', 'SE', 'sv', 'https://www.svt.se/nyheter/rss.xml', 'Serviço público', 'geral', 'A televisão pública sueca.'],
+  ['Yle', 'FI', 'fi', 'https://feeds.yle.fi/uutiset/v1/majorHeadlines/YLE_UUTISET.rss', 'Serviço público', 'geral', 'A emissora pública finlandesa.'],
+  ['NRK', 'NO', 'no', 'https://www.nrk.no/toppsaker.rss', 'Serviço público', 'geral', 'A emissora pública norueguesa.'],
+  ['Notes from Poland', 'PL', 'en', 'https://notesfrompoland.com/feed/', 'Independente', 'politica', 'A Polónia explicada em inglês.', 1],
+  ['The Kyiv Independent', 'UA', 'en', 'https://kyivindependent.com/rss/', 'Independente', 'politica', 'Jornalismo ucraniano independente.', 1],
+  ['Euronews', 'EU', 'en', 'https://www.euronews.com/rss', 'Internacional', 'geral', 'Notícias europeias.'],
+  ['Politico Europe', 'EU', 'en', 'https://www.politico.eu/feed/', 'Referência', 'politica', 'Os bastidores de Bruxelas.'],
+  ['Euractiv', 'EU', 'en', 'https://www.euractiv.com/feed/', 'Independente', 'politica,economia', 'Políticas da UE por tema.', 1],
+  ['EUobserver', 'EU', 'en', 'https://euobserver.com/rss', 'Independente', 'politica', 'Jornal independente sobre a UE.', 1],
+  ['Bruegel', 'EU', 'en', 'https://www.bruegel.org/rss.xml', 'Independente', 'economia', 'Centro de estudos de economia europeia.', 1],
+  ['Balkan Insight', 'EU', 'en', 'https://balkaninsight.com/feed/', 'Investigação', 'politica', 'Investigação sobre os Balcãs.', 1],
+  // ——— Américas ———
+  ['NPR', 'US', 'en', 'https://feeds.npr.org/1001/rss.xml', 'Serviço público', 'geral', 'A rádio pública norte-americana.'],
+  ['The New York Times', 'US', 'en', 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml', 'Referência', 'geral,politica', 'Diário de referência (paywall).'],
+  ['Politico', 'US', 'en', 'https://rss.politico.com/politics-news.xml', 'Referência', 'politica', 'Política em Washington.'],
+  ['ProPublica', 'US', 'en', 'https://www.propublica.org/feeds/propublica/main', 'Investigação', 'politica', 'Investigação vencedora de Pulitzers.', 1],
+  ['CNBC', 'US', 'en', 'https://www.cnbc.com/id/100003114/device/rss/rss.html', 'Referência', 'economia,financas', 'Mercados e negócios.'],
+  ['Bloomberg Markets', 'US', 'en', 'https://feeds.bloomberg.com/markets/news.rss', 'Referência', 'financas', 'Mercados financeiros globais.'],
+  ['ESPN', 'US', 'en', 'https://www.espn.com/espn/rss/news', 'Referência', 'esportes', 'Desporto norte-americano e mundial.'],
+  ['Ars Technica', 'US', 'en', 'https://feeds.arstechnica.com/arstechnica/index', 'Tecnologia', 'tecnologia', 'Tecnologia e ciência a fundo.'],
+  ['The Verge', 'US', 'en', 'https://www.theverge.com/rss/index.xml', 'Tecnologia', 'tecnologia', 'Tecnologia e cultura digital.'],
+  ['TechCrunch', 'US', 'en', 'https://techcrunch.com/feed/', 'Tecnologia', 'tecnologia,financas', 'Startups e investimento.'],
+  ['Hacker News', 'US', 'en', 'https://hnrss.org/frontpage', 'Independente', 'tecnologia', 'Os links mais votados por programadores.', 1],
+  ['CBC News', 'CA', 'en', 'https://www.cbc.ca/webfeed/rss/rss-topstories', 'Serviço público', 'geral', 'A emissora pública canadiana.'],
+  ['Animal Político', 'MX', 'es', 'https://www.animalpolitico.com/feed', 'Independente', 'politica', 'Jornalismo digital mexicano.', 1],
+  ['Clarín', 'AR', 'es', 'https://www.clarin.com/rss/lo-ultimo/', 'Referência', 'geral', 'O maior diário argentino.'],
+  ['Infobae', 'AR', 'es', 'https://www.infobae.com/feeds/rss/', 'Referência', 'geral', 'Atualidade latino-americana.'],
+  ['CIPER', 'CL', 'es', 'https://www.ciperchile.cl/feed/', 'Investigação', 'politica', 'Investigação jornalística no Chile.', 1],
+  ['El Tiempo', 'CO', 'es', 'https://www.eltiempo.com/rss/colombia.xml', 'Referência', 'geral', 'O principal diário colombiano.'],
+  // ——— África, Médio Oriente, Ásia, Oceânia ———
+  ['Daily Maverick', 'ZA', 'en', 'https://www.dailymaverick.co.za/dmrss/', 'Investigação', 'politica', 'Investigação sul-africana premiada.', 1],
+  ['Premium Times', 'NG', 'en', 'https://www.premiumtimesng.com/feed', 'Investigação', 'politica', 'Investigação na Nigéria.', 1],
+  ['RFI Português', 'MZ', 'pt', 'https://www.rfi.fr/pt/rss', 'Internacional', 'geral', 'Muita África lusófona.', 1],
+  ['DW Português', 'AO', 'pt', 'https://rss.dw.com/rdf/rss-por-all', 'Internacional', 'geral', 'Atenta a Angola e Moçambique.'],
+  ['Al Jazeera', 'QA', 'en', 'https://www.aljazeera.com/xml/rss/all.xml', 'Internacional', 'geral,politica', 'Grande cobertura do Sul global.'],
+  ['The Times of Israel', 'IL', 'en', 'https://www.timesofisrael.com/feed/', 'Referência', 'geral', 'Israel e a região, em inglês.'],
+  ['NHK', 'JP', 'ja', 'https://www3.nhk.or.jp/rss/news/cat0.xml', 'Serviço público', 'geral', 'A emissora pública japonesa.'],
+  ['The Japan Times', 'JP', 'en', 'https://www.japantimes.co.jp/feed/', 'Referência', 'geral', 'O Japão em inglês.'],
+  ['The Hindu', 'IN', 'en', 'https://www.thehindu.com/news/national/feeder/default.rss', 'Referência', 'geral', 'Um dos diários mais respeitados da Índia.'],
+  ['South China Morning Post', 'HK', 'en', 'https://www.scmp.com/rss/91/feed', 'Referência', 'geral', 'China e Ásia vistas de Hong Kong.'],
+  ['CNA', 'SG', 'en', 'https://www.channelnewsasia.com/rssfeeds/8395986', 'Referência', 'geral', 'O Sudeste Asiático a partir de Singapura.'],
+  ['Rappler', 'PH', 'en', 'https://www.rappler.com/feed/', 'Independente', 'politica', 'Fundado por Maria Ressa, Nobel da Paz.', 1],
+  ['Yonhap', 'KR', 'en', 'https://en.yna.co.kr/RSS/news.xml', 'Agência', 'geral', 'A agência sul-coreana, em inglês.'],
+  ['ABC News', 'AU', 'en', 'https://www.abc.net.au/news/feed/51120/rss.xml', 'Serviço público', 'geral', 'A emissora pública australiana.'],
+  ['RNZ', 'NZ', 'en', 'https://www.rnz.co.nz/rss/national.xml', 'Serviço público', 'geral', 'A rádio pública neozelandesa.'],
+  ['Rest of World', 'INT', 'en', 'https://restofworld.org/feed/latest', 'Tecnologia', 'tecnologia', 'Tecnologia fora do Ocidente.', 1],
+  ['Global Voices', 'INT', 'pt', 'https://pt.globalvoices.org/feed/', 'Independente', 'geral', 'Vozes de todo o mundo, em português.', 1],
+  ['BBC World', 'INT', 'en', 'https://feeds.bbci.co.uk/news/world/rss.xml', 'Internacional', 'geral,politica', 'As principais notícias do mundo.']
+].map(([name, cc, lang, url, type, cats, desc, gem]) => ({ name, cc, lang, url, type, cats: cats.split(','), desc, gem: !!gem }));
+
+// Google News: manchetes de um país ou pesquisa de um tema (gera um feed RSS)
+const GNEWS = {
+  PT: 'hl=pt-PT&gl=PT&ceid=PT:pt-150', BR: 'hl=pt-BR&gl=BR&ceid=BR:pt-419', ES: 'hl=es&gl=ES&ceid=ES:es', FR: 'hl=fr&gl=FR&ceid=FR:fr',
+  DE: 'hl=de&gl=DE&ceid=DE:de', IT: 'hl=it&gl=IT&ceid=IT:it', GB: 'hl=en-GB&gl=GB&ceid=GB:en', US: 'hl=en-US&gl=US&ceid=US:en',
+  MX: 'hl=es-419&gl=MX&ceid=MX:es-419', AR: 'hl=es-419&gl=AR&ceid=AR:es-419', CA: 'hl=en-CA&gl=CA&ceid=CA:en', IN: 'hl=en-IN&gl=IN&ceid=IN:en',
+  JP: 'hl=ja&gl=JP&ceid=JP:ja', AU: 'hl=en-AU&gl=AU&ceid=AU:en', ZA: 'hl=en-ZA&gl=ZA&ceid=ZA:en', NG: 'hl=en-NG&gl=NG&ceid=NG:en'
+};
+const gnewsUrl = (cc, q) => q ? `https://news.google.com/rss/search?q=${encodeURIComponent(q)}&${GNEWS[cc]}` : `https://news.google.com/rss?${GNEWS[cc]}`;
+const flag = cc => !cc ? '' : cc === 'INT' ? '🌍' : String.fromCodePoint(...[...cc].map(c => 0x1F1E6 + c.charCodeAt(0) - 65));
+const cname = cc => COUNTRIES[cc]?.[0] || cc;
+
+function starter(){
+  const pick = n => OUTLETS.find(o => o.name === n);
+  const sources = ['g1', 'Folha de S.Paulo', 'Público', 'BBC News Brasil', 'Tecnoblog', 'Diolinux', 'Euronews'].map(pick).filter(Boolean)
+    .map((o, i) => ({ id: uid(), name: o.name, url: o.url, cc: o.cc, lang: o.lang, color: PALETTE[i % PALETTE.length] }));
+  const d = demo();
+  return { ...d, sources, articles: [], read: {}, saved: {}, highlights: [], muted: [] };
+}
+function demo(){
+  const now = Date.now();
+  const sources = [
+    { id: 's1', name: 'Linux Hoje', url: 'https://exemplo-linux.pt/feed', color: PALETTE[2], cc: 'PT' },
+    { id: 's2', name: 'Dados & Gráficos', url: 'https://exemplo-dados.br/rss', color: PALETTE[1], cc: 'BR' },
+    { id: 's3', name: 'Tech Europa', url: 'https://exemplo-tech.eu/feed', color: PALETTE[4], cc: 'EU' },
+    { id: 's4', name: 'Ciência Curiosa', url: 'https://exemplo-ciencia.pt/feed', color: PALETTE[3], cc: 'PT' },
+    { id: 's5', name: 'Crónica Ibérica', url: 'https://exemplo-iberica.es/feed', color: PALETTE[5], cc: 'ES' },
+    { id: 's6', name: 'Tóquio Hoje', url: 'https://exemplo-toquio.jp/feed', color: PALETTE[6], cc: 'JP' }
+  ];
+  const A = (id, s, h, title, content) => ({ id, sourceId: s, date: now - h * 36e5, url: '', title, content });
+  const articles = [
+    A('a1','s2',2,'Cinco erros comuns ao desenhar um dashboard (e como os evitar)',
+      'Muitos dashboards falham porque tentam mostrar tudo ao mesmo tempo. O primeiro erro é colocar demasiados gráficos no mesmo ecrã, o que obriga a pessoa a procurar a informação em vez de a encontrar.\n\nO segundo erro é usar cores sem significado: cada cor num dashboard deve representar uma categoria ou um estado. O terceiro erro é esquecer o contexto, como comparar com o mês anterior ou com uma meta.\n\nO quarto é escolher gráficos circulares para muitas categorias, quando um gráfico de barras ordenado é quase sempre mais legível. Por fim, muitos dashboards não dizem de onde vêm os dados nem quando foram atualizados.\n\nUma boa regra é começar pela pergunta que o dashboard deve responder e só depois escolher os gráficos.'),
+    A('a2','s1',5,'Nova versão de uma distribuição Linux traz kernel mais recente e melhor desempenho em jogos',
+      'A nova versão chega com um kernel mais recente e melhor suporte para placas gráficas modernas. A equipa diz que o arranque ficou mais rápido em portáteis.\n\nO instalador foi redesenhado e agora permite escolher o ambiente de trabalho logo no início. Também há melhorias para jogos, com drivers atualizados e uma camada de compatibilidade mais estável.\n\nPara quem já usa a distribuição, a atualização pode ser feita pelo terminal com um único comando. Utilizadores de hardware antigo devem ler as notas da versão antes de atualizar.'),
+    A('a3','s3',9,'Cresce a procura por serviços europeus focados em privacidade',
+      'Empresas e particulares estão a procurar alternativas europeias para email, armazenamento na nuvem e mensagens. O principal motivo apontado é a privacidade e o facto de os dados ficarem guardados na Europa, sob regras europeias.\n\nServiços com encriptação de ponta a ponta estão entre os mais procurados. Alguns analistas lembram que mudar de serviço exige tempo, sobretudo para migrar ficheiros e contactos.\n\nProjetos open-source europeus também ganharam utilizadores, porque permitem que qualquer pessoa verifique o código.'),
+    A('a4','s2',20,'Atalhos de folha de cálculo que poupam horas de análise de dados',
+      'As folhas de cálculo continuam a ser a ferramenta mais usada para analisar dados. Aprender alguns atalhos de teclado pode poupar muito tempo.\n\nAs tabelas dinâmicas permitem resumir milhares de linhas em segundos. A formatação condicional ajuda a ver padrões rapidamente.\n\nAntes de criar gráficos ou dashboards, vale a pena limpar os dados: remover duplicados, corrigir datas e uniformizar nomes.'),
+    A('a5','s4',26,'Porque é que o cérebro se lembra melhor do que lê em papel?',
+      'Vários estudos sugerem que ler em papel ajuda a lembrar melhor a ordem dos acontecimentos de uma história. Uma das explicações é a sensação física de avançar nas páginas.\n\nNo ecrã, a tendência é ler mais depressa e saltar partes. Os investigadores dizem que a diferença diminui quando a pessoa lê com atenção e sem notificações.\n\nFazer pequenos resumos depois de ler, ou destacar as frases principais, também ajuda a memorizar, seja em papel ou no ecrã.'),
+    A('a6','s3',30,'Telemóveis dobráveis: já vale a pena comprar um?',
+      'Os telemóveis dobráveis estão mais resistentes e mais baratos do que há dois anos. Ainda assim, continuam mais caros do que modelos tradicionais.\n\nA bateria e a durabilidade do ecrã são as maiores dúvidas dos compradores. Para quem lê muito no telemóvel, o ecrã maior pode ser uma vantagem real.'),
+    A('a7','s1',48,'Guia rápido: personalizar o ambiente de trabalho no Linux sem partir nada',
+      'Personalizar o Linux é uma das partes mais divertidas de usar o sistema. Temas, ícones e extensões mudam completamente o aspeto do ambiente de trabalho.\n\nAntes de começar, faz uma cópia dos ficheiros de configuração da tua pasta pessoal. Assim, se alguma coisa correr mal, voltas atrás em segundos.\n\nPrefere temas e extensões das lojas oficiais da tua distribuição, porque costumam ser testados com a versão que estás a usar.'),
+    A('a8','s4',60,'O truque dos cientistas para ler 50 artigos por semana',
+      'Investigadores que leem muito raramente leem tudo do início ao fim. Começam pelo resumo, depois pelas conclusões e só depois decidem se vale a pena ler o resto.\n\nEste método funciona também para notícias e artigos de blogs: ler primeiro os pontos principais poupa tempo e ajuda a escolher o que merece mais atenção.\n\nGuardar as ideias mais importantes num sítio só, como uma aplicação de notas, ajuda a ligar o que se aprende ao longo do tempo.')
+    ,A('a9','s5',7,'Madrid testa autocarros elétricos sem condutor em bairros residenciais',
+      'A cidade de Madrid começou a testar autocarros elétricos sem condutor em dois bairros residenciais. Os veículos circulam a baixa velocidade e têm sempre um técnico a bordo durante os primeiros meses.\n\nOs moradores podem usar o serviço gratuitamente durante o período de testes. A câmara diz que quer perceber se este tipo de transporte ajuda a ligar zonas mal servidas às estações de metro.'),
+    A('a10','s6',14,'Japão aposta em bibliotecas abertas 24 horas para estudantes',
+      'Várias cidades japonesas estão a abrir bibliotecas durante toda a noite, sobretudo em época de exames. A ideia é dar aos estudantes um sítio calmo para ler e estudar fora de casa.\n\nAs bibliotecas usam cartões de acesso e câmaras, e têm zonas de silêncio total. Alguns espaços oferecem também chá gratuito e salas para pequenas pausas.')
+  ];
+  return {
+    sources, articles,
+    interests: [
+      { id: 'i1', text: 'Dicas para criar dashboards e gráficos', prio: true },
+      { id: 'i2', text: 'Novidades em distribuições Linux e jogos', prio: false },
+      { id: 'i3', text: 'Software europeu e privacidade', prio: false },
+      { id: 'i4', text: 'Como ler e memorizar melhor', prio: false }
+    ],
+    muted: ['dobráveis'],
+    read: { a6: now - 3 * 36e5 }, saved: { a5: now }, later: {}, highlights: [
+      { id: 'h1', articleId: 'a5', text: 'Fazer pequenos resumos depois de ler, ou destacar as frases principais, também ajuda a memorizar', date: now - DAY }
+    ],
+    settings: { theme: '', size: 19 }
+  };
+}
+
+let S;
+function load(){
+  try { const r = localStorage.getItem(KEY); S = r ? JSON.parse(r) : (isApp ? starter() : demo()); } catch(e){ S = isApp ? starter() : demo(); }
+  for (const k of ['read','saved','later']) S[k] ||= {};
+  S.highlights ||= []; S.muted ||= []; S.settings ||= { theme: '', size: 19 };
+}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
+
+/* ================= Texto ================= */
+const STOP = new Set('para como com sem que uma umas uns por pelo pela pelos pelas mais menos dos das nos nas aos sobre entre quando onde quem qual quais isto isso este esta esse essa muito muita melhor melhores novas novos nova novo dicas coisas fazer ter ser está são foi tem criar porque depois antes ainda também mesmo cada todo toda todos todas seus suas pode podem entre desde'.split(' '));
+const norm = s => (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+const stem = w => w.length < 5 ? w : w.replace(/coes$/, 'cao').replace(/oes$/, 'ao').replace(/s$/, '');
+const words = t => norm(t).split(/[^a-z0-9]+/).filter(Boolean);
+const keywords = t => [...new Set(words(t).filter(w => w.length > 3 && !STOP.has(w)).map(stem))];
+const hits = (t, kws) => { const ws = words(t).map(stem); return kws.filter(k => ws.some(w => w.startsWith(k))); };
+const sentences = t => t.replace(/\n+/g, ' ').split(/(?<=[.!?])\s+/).map(s => s.trim()).filter(s => s.length > 20);
+const readMin = t => Math.max(1, Math.round(words(t).length / 220));
+const isMuted = a => S.muted.some(m => m && norm(a.title + ' ' + a.content).includes(norm(m)));
+
+const cache = new Map();
+function analyse(a){
+  const ck = a.id + '|' + S.interests.map(i => i.text + i.prio).join();
+  if (cache.has(ck)) return cache.get(ck);
+  const ints = S.interests.map(i => ({ ...i, kws: keywords(i.text) }));
+  const allK = [...new Set(ints.flatMap(i => i.kws))];
+  const matched = []; let score = 0;
+  for (const i of ints){
+    const s = (hits(a.title, i.kws).length * 3 + hits(a.content, i.kws).length) * (i.prio ? 1.6 : 1);
+    if (s > 0){ matched.push({ id: i.id, text: i.text, prio: i.prio, kws: i.kws }); score += s; }
+  }
+  const sents = sentences(a.content);
+  const summary = sents.map((s, idx) => ({ s, idx, v: hits(s, allK).length * 2 + (idx === 0 ? 1.5 : 0) + (idx === sents.length - 1 ? .5 : 0) }))
+    .sort((x, y) => y.v - x.v).slice(0, 3).sort((x, y) => x.idx - y.idx).map(x => x.s);
+  const answers = matched.map(m => {
+    const best = sents.map(s => ({ s, v: hits(s, m.kws).length })).sort((x, y) => y.v - x.v)[0];
+    return best && best.v ? { q: m.text, a: best.s } : null;
+  }).filter(Boolean);
+  const r = { score: Math.min(99, Math.round(score * 11)), matched, summary, answers, allK };
+  cache.set(ck, r); return r;
+}
+
+/* ================= RSS ================= */
+function htmlToText(h){
+  const d = document.createElement('div');
+  d.innerHTML = (h || '').replace(/<\/(p|div|h\d|li|blockquote)>/gi, '\n\n').replace(/<br\s*\/?>/gi, '\n');
+  return d.textContent.replace(/\n{3,}/g, '\n\n').trim();
+}
+function firstImg(h){ const m = (h || '').match(/<img[^>]+src=["']([^"']+)/i); return m ? m[1] : ''; }
+function parseFeed(xmlText, src){
+  const xml = new DOMParser().parseFromString(xmlText, 'text/xml');
+  if (xml.querySelector('parsererror')) throw new Error('XML inválido');
+  const title = xml.querySelector('channel > title, feed > title')?.textContent?.trim();
+  const items = [...xml.querySelectorAll('item, entry')].slice(0, 30).map(it => {
+    const g = sel => it.getElementsByTagName(sel)[0]?.textContent || '';
+    const raw = g('content:encoded') || g('content') || g('description') || g('summary');
+    const linkEl = it.getElementsByTagName('link')[0];
+    const link = linkEl?.getAttribute('href') || linkEl?.textContent || '';
+    const enc = it.getElementsByTagName('enclosure')[0]?.getAttribute('url') || it.getElementsByTagName('media:content')[0]?.getAttribute('url') || it.getElementsByTagName('media:thumbnail')[0]?.getAttribute('url') || '';
+    const d = Date.parse(g('pubDate') || g('updated') || g('published') || g('dc:date'));
+    return { id: uid(), sourceId: src.id, title: htmlToText(g('title')), url: link.trim(), date: isNaN(d) ? Date.now() : d, content: htmlToText(raw), image: enc || firstImg(raw) };
+  }).filter(a => a.title);
+  return { title, items };
+}
+function addItems(items){
+  let n = 0;
+  for (const it of items) if (!S.articles.some(a => (it.url && a.url === it.url) || a.title === it.title)){ S.articles.push(it); n++; }
+  return n;
+}
+async function fetchFeed(src){
+  // No app instalado (Tauri) este pedido passa pelo plugin HTTP e funciona.
+  const res = await xfetch(src.url);
+  return parseFeed(await res.text(), src);
+}
+async function refreshAll(silent){
+  if (!silent) toast('A procurar novidades nos teus feeds…');
+  let ok = 0, n = 0;
+  for (const s of S.sources){ try { const f = await fetchFeed(s); n += addItems(f.items); s.last = Date.now(); ok++; } catch(e){} }
+  save(); if (!current) render();
+  if (!silent || !ok) toast(ok ? `${n} artigos novos de ${ok} feeds` : (isApp ? 'Sem ligação aos feeds. Verifica a internet.' : 'Neste protótipo a internet está bloqueada. No app instalado, isto atualiza os feeds reais.'));
+}
+
+/* ================= Helpers UI ================= */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+const src = id => S.sources.find(s => s.id === id) || { name: 'Artigo colado', color: '#8b8693' };
+const ago = t => { const m = (Date.now() - t) / 6e4; if (m < 60) return `há ${Math.max(1, Math.round(m))} min`; if (m < 1440) return `há ${Math.round(m / 60)} h`; const d = Math.round(m / 1440); return d === 1 ? 'ontem' : `há ${d} dias`; };
+const grad = (c, seed = 0) => `background:radial-gradient(120% 90% at ${20 + seed % 60}% 10%, ${c} 0%, transparent 60%), radial-gradient(100% 100% at 100% 100%, ${shade(c, -40)} 0%, transparent 70%), linear-gradient(135deg, ${shade(c, 20)}, ${shade(c, -55)})`;
+function shade(hex, p){ const n = parseInt(hex.slice(1), 16); let r = n >> 16, g = n >> 8 & 255, b = n & 255; const f = v => Math.max(0, Math.min(255, Math.round(v + (p / 100) * (p > 0 ? 255 - v : v)))); return '#' + [f(r), f(g), f(b)].map(v => v.toString(16).padStart(2, '0')).join(''); }
+const hash = s => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
+function toast(m){ const t = $('#toast'); t.textContent = m; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 3400); }
+const ICON = {
+  bm: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"/></svg>',
+  bmOn: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 3h12v18l-6-4-6 4z"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  play: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" stroke-linecap="round"/></svg>',
+  aa: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19 8 6l5 13M4.8 15h6.4M15 19l3-8 3 8M15.8 17h4.4"/></svg>',
+  md: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg>'
+};
+function thumb(a, cls = 'thumb'){
+  const s = src(a.sourceId);
+  return `<div class="${cls}" style="${grad(s.color, hash(a.id))}">${a.image ? `<img src="${esc(a.image)}" alt="" onerror="this.remove()">` : ''}${cls === 'thumb' ? esc(s.name[0]) : ''}</div>`;
+}
+function artCard(a){
+  const r = analyse(a), s = src(a.sourceId);
+  const top = r.matched[0];
+  return `<div class="erow fade ${S.read[a.id] ? 'read' : ''}" data-open="${a.id}">
+    <div class="etext">
+      <div class="src"><span class="dot" style="background:${s.color}"></span>${s.cc ? `<span class="fl">${flag(s.cc)}</span>` : ''}${esc(s.name)}<span class="when">${ago(a.date)}</span></div>
+      <h3>${esc(a.title)}</h3>
+      <div class="foot">
+        ${top ? `<span class="why ${top.prio ? 'prio' : ''}">${top.prio ? '⚡' : '✦'} ${esc(top.text)}</span>` : `<span>${readMin(a.content)} min de leitura</span>`}
+        <span class="sp"></span>
+        <button class="bm ${S.saved[a.id] ? 'on' : ''}" data-save="${a.id}" title="Guardar">${S.saved[a.id] ? ICON.bmOn : ICON.bm}</button>
+      </div>
+    </div>
+    ${thumb(a)}
+  </div>`;
+}
+function miniCard(x){
+  const s = src(x.a.sourceId);
+  return `<div class="mcard" data-open="${x.a.id}">
+    <div class="mcover" style="${grad(s.color, hash(x.a.id))}">${x.a.image ? `<img src="${esc(x.a.image)}" alt="" onerror="this.remove()">` : `<span>${esc(s.name[0])}</span>`}</div>
+    <div class="mbody"><div class="src"><span class="dot" style="background:${s.color}"></span>${esc(s.name)}</div><b>${esc(x.a.title)}</b></div>
+  </div>`;
+}
+function groupBy(list){
+  if (mode === 'pais'){
+    const g = {}; for (const x of [...list].sort((a, b) => b.a.date - a.a.date)){ const cc = src(x.a.sourceId).cc || '??'; (g[cc] ||= []).push(x); }
+    return Object.entries(g).sort((a, b) => b[1].length - a[1].length).map(([cc, xs]) => [cc === '??' ? 'Sem país' : `${flag(cc)}  ${cname(cc)}`, xs]);
+  }
+  if (mode === 'recentes' || mode === 'naolidos'){
+    const g = { 'Hoje': [], 'Ontem': [], 'Esta semana': [], 'Mais antigos': [] };
+    const t0 = new Date(); t0.setHours(0, 0, 0, 0);
+    for (const x of list){ const d = x.a.date; (d >= t0 ? g['Hoje'] : d >= t0 - DAY ? g['Ontem'] : d >= t0 - 6 * DAY ? g['Esta semana'] : g['Mais antigos']).push(x); }
+    return Object.entries(g);
+  }
+  const g = { 'Muito a ver contigo': [], 'Pode interessar-te': [], 'Outras leituras': [] };
+  for (const x of list) (x.r.score >= 40 ? g['Muito a ver contigo'] : x.r.score > 0 ? g['Pode interessar-te'] : g['Outras leituras']).push(x);
+  return Object.entries(g);
+}
+const short = t => t.length > 26 ? t.slice(0, 24).trim() + '…' : t;
+
+
+/* ================= Feeds: descobrir / tema / a seguir ================= */
+let fsub = 'descobrir', dRegion = 'all', dLang = 'all', dGem = false, dQuery = '', country = 'all', dCat = 'all', web = { q: '', state: '', items: [] };
+const followed = url => S.sources.some(s => s.url === url);
+function outletRow(o){
+  return `<div class="orow">
+    <div class="av" style="background:${TYPE_COLOR[o.type] || '#888'}">${esc(o.name[0])}</div>
+    <div class="grow">
+      <b>${esc(o.name)} ${o.gem ? '<span class="gem" title="Joia escondida">💎</span>' : ''}</b>
+      <p>${esc(o.desc)}</p>
+      <div class="otags">${o.cats.map(c => `<span class="ct">${CATS[c]}</span>`).join('')}<span>${o.type}</span><span>${LANGS[o.lang] || o.lang}</span></div>
+    </div>
+    ${followed(o.url) ? '<span class="pill done">✓</span>' : `<button class="pill acc" data-follow="${OUTLETS.indexOf(o)}">Seguir</button>`}
+  </div>`;
+}
+function discFiltered(){
+  const q = norm(dQuery);
+  return OUTLETS.filter(o => (dRegion === 'all' || (dRegion === 'Brasil' ? o.cc === 'BR' : COUNTRIES[o.cc][1] === dRegion)) && (dLang === 'all' || o.lang === dLang) && (!dGem || o.gem) && (dCat === 'all' || o.cats.includes(dCat))
+    && (!q || norm([o.name, o.desc, o.type, cname(o.cc), COUNTRIES[o.cc][1], LANGS[o.lang], ...o.cats.map(c => CATS[c])].join(' ')).includes(q)));
+}
+function discResults(){
+  const list = discFiltered();
+  const webBox = dQuery.trim().length >= 2 ? webSection() : '';
+  if (!list.length) return webBox + `<div class="empty"><div class="big">🧭</div>Nenhum jornal da lista corresponde. Usa a pesquisa na web acima para descobrir mais sites.</div>`;
+  const byCc = {}; list.forEach(o => (byCc[o.cc] ||= []).push(o));
+  return webBox + Object.entries(byCc).map(([cc, os]) => `
+    <div class="country fade">
+      <div class="chead">
+        <span class="flag">${flag(cc)}</span>
+        <div class="grow"><b>${cname(cc)}</b><small>${COUNTRIES[cc][1]} · ${os.length} ${os.length === 1 ? 'jornal' : 'jornais'}</small></div>
+        ${GNEWS[cc] ? (followed(gnewsUrl(cc)) ? '<span class="pill done">✓ Manchetes</span>' : `<button class="pill" data-gnews="${cc}" title="Manchetes do Google News">＋ Manchetes</button>`) : ''}
+      </div>
+      ${os.map(outletRow).join('')}
+      ${os.length > 1 ? `<button class="followall" data-followcc="${cc}" data-ids="${os.map(o => OUTLETS.indexOf(o)).join(',')}">Seguir todos de ${cname(cc)}${dCat !== 'all' ? ' · ' + CATS[dCat] : ''}</button>` : ''}
+    </div>`).join('') + (webBox ? '' : '');
+}
+function discoverView(){
+  const gems = OUTLETS.filter(o => o.gem);
+  const pick = gems.sort((a, b) => hash(a.name + dkey(Date.now())) - hash(b.name + dkey(Date.now()))).slice(0, 6);
+  const showGems = !dQuery && dRegion === 'all' && dLang === 'all' && !dGem;
+  return `
+    <div class="search open" style="display:block"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="dq" value="${esc(dQuery)}" placeholder="Pesquisar jornal, país, tema ou site…"></div>
+    <div class="chips">
+      <button class="chip ${dRegion === 'all' ? 'on' : ''}" data-region="all">🌍 Mundo</button>
+      ${REGIONS.map(r => `<button class="chip ${dRegion === r ? 'on' : ''}" data-region="${r}">${r}</button>`).join('')}
+    </div>
+    <div class="chips" style="padding-top:0">
+      <button class="chip ${dCat === 'all' ? 'on' : ''}" data-dcat="all">Todos os temas</button>
+      ${Object.entries(CATS).map(([k, v]) => `<button class="chip ${dCat === k ? 'on' : ''}" data-dcat="${k}">${v}</button>`).join('')}
+    </div>
+    <div class="chips" style="padding-top:0">
+      <button class="chip ${dGem ? 'on' : ''}" data-gemtoggle>💎 Joias escondidas</button>
+      <button class="chip ${dLang === 'all' ? 'on' : ''}" data-dlang="all">Todas as línguas</button>
+      ${Object.entries(LANGS).map(([k, v]) => `<button class="chip ${dLang === k ? 'on' : ''}" data-dlang="${k}">${v}</button>`).join('')}
+    </div>
+    ${showGems ? `
+      <div class="feat">
+        <button class="ftbig br" data-region="Brasil"><span>🇧🇷</span><b>Brasil</b><small>${OUTLETS.filter(o => o.cc === 'BR').length} jornais · política, economia, finanças, esportes, tecnologia</small></button>
+        <button class="ftbig eu" data-region="Europa"><span>🇪🇺</span><b>Europa</b><small>${OUTLETS.filter(o => COUNTRIES[o.cc][1] === 'Europa').length} jornais de ${new Set(OUTLETS.filter(o => COUNTRIES[o.cc][1] === 'Europa').map(o => o.cc)).size} países</small></button>
+      </div>
+      <div class="sec"><h2>💎 Joias escondidas</h2><span>bons e pouco conhecidos</span></div>
+      <div class="carousel">${pick.map(o => `
+        <div class="gcard" style="${grad(TYPE_COLOR[o.type] === '#16141b' ? '#555' : TYPE_COLOR[o.type], hash(o.name))}">
+          <div class="gtop"><span class="gflag">${flag(o.cc)}</span><span class="gtype">${o.type}</span></div>
+          <b>${esc(o.name)}</b><p>${esc(o.desc)}</p>
+          ${followed(o.url) ? '<span class="gbtn done">✓ A seguir</span>' : `<button class="gbtn" data-follow="${OUTLETS.indexOf(o)}">Seguir</button>`}
+        </div>`).join('')}</div>
+      <div class="sec"><h2>Jornais por país</h2><span>${OUTLETS.length} sugestões</span></div>` : '<div style="height:10px"></div>'}
+    ${!showGems && !dQuery ? '' : ''}
+    <div id="discRes">${discResults()}</div>
+    <div class="note proto"><span>ℹ️</span><span>Os links destes feeds foram escritos à mão e vão ser confirmados quando passarmos o app para o telemóvel.</span></div>`;
+}
+function topicView(){
+  const ccs = Object.keys(GNEWS);
+  const tq = S.settings.tq || '', tc = S.settings.tc || 'PT';
+  return `
+    <div class="sec"><h2>Notícias sobre um tema</h2></div>
+    <p class="sub">Como no Google News: escreves um tema, escolhes o país, e o app cria um feed que junta artigos de centenas de jornais.</p>
+    <div class="stack">
+      <input id="tq" value="${esc(tq)}" placeholder="ex.: inteligência artificial, Linux, eleições…">
+      <div class="chips" style="padding:2px 18px 4px">${['Inteligência artificial', 'Linux', 'Visualização de dados', 'Privacidade', 'Clima', 'Ciência'].map(t => `<button class="chip" data-tsug="${t}">＋ ${t}</button>`).join('')}</div>
+      <b style="display:block;font-size:13px;color:var(--muted)">Em que país?</b>
+      <div class="chips" style="padding:2px 18px 4px">${ccs.map(cc => `<button class="chip ${tc === cc ? 'on' : ''}" data-tc="${cc}">${flag(cc)} ${cname(cc)}</button>`).join('')}</div>
+      <button class="btn acc block" id="followTopic">Seguir “${esc(tq || '…')}” em ${flag(tc)} ${cname(tc)}</button>
+    </div>
+    <div class="sec"><h2>Manchetes por país</h2></div>
+    <p class="sub">As notícias principais de cada país, num só feed.</p>
+    <div class="flaggrid">${ccs.map(cc => `<button class="ftile ${followed(gnewsUrl(cc)) ? 'on' : ''}" data-gnews="${cc}"><span>${flag(cc)}</span>${cname(cc)}${followed(gnewsUrl(cc)) ? '<i>✓</i>' : ''}</button>`).join('')}</div>`;
+}
+function followingView(){
+  return `
+    <div class="inline" style="margin-top:6px"><input id="srcUrl" placeholder="Cola um link RSS (ex.: site.pt/feed)" inputmode="url"><button class="btn acc" id="addSrc">Seguir</button></div>
+    <div class="rows" style="margin-top:12px">${S.sources.length ? S.sources.map(s => `
+      <div class="rowi"><div class="av" style="${grad(s.color)}">${esc(s.name[0])}</div>
+        <div class="grow"><b>${s.cc ? flag(s.cc) + ' ' : ''}${esc(s.name)}</b><small>${esc(s.url)}</small></div>
+        <span class="pill">${S.articles.filter(a => a.sourceId === s.id).length}</span>
+        <button class="x" data-delsrc="${s.id}" title="Deixar de seguir">×</button></div>`).join('') : '<div class="empty">Ainda não segues nenhum feed. Vai a 🌍 Descobrir.</div>'}
+    </div>
+    <div class="grid2" style="margin-top:12px">
+      <label class="file btn soft">⤓ Importar .xml / OPML<input type="file" id="fileIn" accept=".xml,.rss,.atom,.opml,text/xml,application/xml"></label>
+      <button class="btn soft" id="pasteXml">⌘ Colar XML</button>
+    </div>
+    <div class="note proto"><span>💡</span><span>Neste protótipo a internet está bloqueada, por isso os feeds não atualizam. Para testar com um feed real, guarda a página RSS como .xml e importa-a aqui.</span></div>`;
+}
+function followOutlet(o, quiet){
+  if (followed(o.url)) return false;
+  S.sources.push({ id: uid(), name: o.name, url: o.url, cc: o.cc, lang: o.lang, color: TYPE_COLOR[o.type] === '#16141b' ? PALETTE[S.sources.length % PALETTE.length] : TYPE_COLOR[o.type] });
+  if (!quiet) toast(`${flag(o.cc)} A seguir ${o.name}`);
+  return true;
+}
+
+
+/* ================= Descobrir sites na web ================= */
+// No app instalado usa o plugin HTTP do Tauri (sem bloqueios de CORS). Aqui, no protótipo, falha e mostramos alternativas.
+const xfetch = (url, opt) => (window.__TAURI__?.http?.fetch || fetch)(url, opt);
+const looksUrl = q => /^(https?:\/\/)?[\w-]+(\.[\w-]+)+(\/\S*)?$/i.test(q.trim());
+async function discoverFeeds(siteUrl){
+  // 1) a página diz onde está o feed (<link rel="alternate" type="application/rss+xml">)
+  if (!/^https?:/.test(siteUrl)) siteUrl = 'https://' + siteUrl;
+  const found = [];
+  try {
+    const html = await (await xfetch(siteUrl)).text();
+    if (/<(rss|feed|rdf:RDF)[\s>]/i.test(html.slice(0, 600))) return [{ url: siteUrl, title: '' }];
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    doc.querySelectorAll('link[rel~="alternate"]').forEach(l => {
+      if (/rss|atom|xml/i.test(l.type || '')) found.push({ url: new URL(l.getAttribute('href'), siteUrl).href, title: l.title || doc.title });
+    });
+  } catch(e){ throw e; }
+  // 2) caminhos comuns
+  if (!found.length) for (const p of ['/feed', '/rss', '/rss.xml', '/feed.xml', '/atom.xml', '/index.xml']){
+    try { const t = await (await xfetch(new URL(p, siteUrl).href)).text(); if (/<(rss|feed|rdf:RDF)[\s>]/i.test(t.slice(0, 600))) { found.push({ url: new URL(p, siteUrl).href, title: '' }); break; } } catch(e){}
+  }
+  return found;
+}
+async function webSearch(q){
+  web = { q, state: 'loading', items: [] }; refreshDisc();
+  try {
+    if (looksUrl(q)){
+      const f = await discoverFeeds(q.trim());
+      web.items = f.map(x => ({ title: x.title || q, url: x.url, site: q, desc: 'Feed encontrado neste site.' }));
+    } else {
+      // diretório público do Feedly: procura feeds por tema ou nome
+      const r = await (await xfetch(`https://cloud.feedly.com/v3/search/feeds?query=${encodeURIComponent(q)}&count=25&locale=pt`)).json();
+      web.items = (r.results || []).map(x => ({ title: x.title, url: (x.feedId || '').replace(/^feed\//, ''), site: x.website, desc: x.description || '', subs: x.subscribers, lang: x.language }));
+      // e os sites que aparecem no Google News para esse tema
+      try {
+        const g = await (await xfetch(gnewsUrl(S.settings.tc || 'PT', q))).text();
+        const doc = new DOMParser().parseFromString(g, 'text/xml'); const seen = new Set(web.items.map(i => i.site));
+        doc.querySelectorAll('item source').forEach(s => { const u = s.getAttribute('url'); if (u && !seen.has(u)){ seen.add(u); web.items.push({ title: s.textContent, url: '', site: u, desc: 'Encontrado no Google News — o app procura o feed ao seguir.' }); } });
+      } catch(e){}
+    }
+    web.state = web.items.length ? 'ok' : 'empty';
+  } catch(e){ web.state = 'offline'; }
+  refreshDisc();
+}
+function refreshDisc(){ const r = $('#discRes'); if (r) r.innerHTML = discResults(); }
+function webSection(){
+  const q = dQuery.trim();
+  const head = `<div class="websec">
+    <div class="wh"><span>🌐</span><div class="grow"><b>Procurar na web</b><small>${looksUrl(q) ? 'Encontrar o feed RSS deste site' : 'Descobrir sites e blogs sobre “' + esc(q) + '”'}</small></div>
+    <button class="pill acc" data-websearch>${web.state === 'loading' && web.q === q ? 'A procurar…' : 'Procurar'}</button></div>`;
+  if (web.q !== q || !web.state) return head + '</div>';
+  if (web.state === 'loading') return head + '<div class="wload"><i></i><i></i><i></i></div></div>';
+  if (web.state === 'offline' && isApp) return head + '<p class="sub" style="margin:10px 0 0">Não foi possível pesquisar agora. Verifica a internet.</p></div>';
+  if (web.state === 'offline') return head + `<div class="note" style="margin:10px 0 4px"><span>📡</span><span>No protótipo a internet está bloqueada. No app instalado, esta pesquisa procura no diretório do Feedly, nos sites do Google News e na própria página do site. Por agora, podes <a href="https://www.google.com/search?q=${encodeURIComponent(q + ' RSS feed')}" target="_blank" rel="noopener" style="color:var(--accent);font-weight:700">procurar no navegador ↗</a> e colar o link em “A seguir”.</span></div></div>`;
+  if (web.state === 'empty') return head + '<p class="sub" style="margin:10px 0 0">Nada encontrado. Tenta outras palavras.</p></div>';
+  return head + web.items.slice(0, 20).map((x, i) => `<div class="orow"><div class="av" style="${grad(PALETTE[i % PALETTE.length])}">${esc((x.title || x.site || '?').replace(/^https?:\/\/(www\.)?/, '')[0].toUpperCase())}</div>
+    <div class="grow"><b>${esc(x.title || x.site)}</b><p>${esc((x.desc || '').slice(0, 140))}</p><div class="otags"><span>${esc((x.site || x.url).replace(/^https?:\/\/(www\.)?/, '').split('/')[0])}</span>${x.subs ? `<span>${x.subs.toLocaleString('pt-PT')} leitores</span>` : ''}${x.lang ? `<span>${esc(x.lang)}</span>` : ''}</div></div>
+    ${followed(x.url) ? '<span class="pill done">✓</span>' : `<button class="pill acc" data-webfollow="${i}">Seguir</button>`}</div>`).join('') + '</div>';
+}
+async function followWeb(i){
+  const x = web.items[i]; let url = x.url;
+  if (!url){ toast('A procurar o feed de ' + x.site + '…'); try { url = (await discoverFeeds(x.site))[0]?.url; } catch(e){} }
+  if (!url) return toast('Não encontrei um feed RSS neste site.');
+  x.url = url; addSource(url, x.title); refreshDisc();
+}
+
+/* ================= Vistas ================= */
+let tab = 'hoje', filter = 'all', mode = 'parati', libMode = 'guardados', query = '';
+
+const views = {
+  hoje(){
+    let list = S.articles.filter(a => !isMuted(a)).map(a => ({ a, r: analyse(a) }));
+    if (query){ const q = norm(query); list = list.filter(x => norm(x.a.title + ' ' + x.a.content).includes(q)); }
+    const top = [...list].filter(x => !S.read[x.a.id]).sort((x, y) => y.r.score - x.r.score || y.a.date - x.a.date);
+    if (filter !== 'all') list = list.filter(x => x.r.matched.some(m => m.id === filter));
+    if (country !== 'all') list = list.filter(x => src(x.a.sourceId).cc === country);
+    const ccs = {}; S.articles.forEach(a => { const c = src(a.sourceId).cc; if (c) ccs[c] = (ccs[c] || 0) + 1; });
+    if (mode === 'parati') list.sort((x, y) => y.r.score - x.r.score || y.a.date - x.a.date);
+    if (mode === 'recentes') list.sort((x, y) => y.a.date - x.a.date);
+    if (mode === 'naolidos') list = list.filter(x => !S.read[x.a.id]).sort((x, y) => y.a.date - x.a.date);
+    const showTop = !query && filter === 'all' && country === 'all';
+    const hero = showTop && top[0];
+    const picks = showTop ? top.slice(1, 6) : [];
+    if (hero) list = list.filter(x => x.a.id !== hero.a.id || mode !== 'parati');
+    const hs = hero && src(hero.a.sourceId);
+    return `
+    ${hero ? `
+      <div class="hero fade" data-open="${hero.a.id}">
+        <div class="bgfx" style="${grad(hs.color, 3)}"></div>
+        ${hero.a.image ? `<img class="bgfx" src="${esc(hero.a.image)}" style="object-fit:cover;width:100%;height:100%" onerror="this.remove()">` : ''}
+        <div class="bgfx grain"></div>
+        <div class="hero-top"><span class="tag">✦ Escolhido para ti</span><span class="tag ghost">${readMin(hero.a.content)} min</span></div>
+        <h3>${esc(hero.a.title)}</h3>
+        <p>${esc(analyse(hero.a).summary[0] || '')}</p>
+        <div class="hero-src">${hs.cc ? flag(hs.cc) : '<span class="dot" style="background:#fff"></span>'} ${esc(hs.name)} · ${ago(hero.a.date)}</div>
+      </div>` : ''}
+    ${picks.length ? `
+      <div class="sec"><h2>Também para ti</h2></div>
+      <div class="carousel">${picks.map(miniCard).join('')}</div>` : ''}
+    <div class="sec"><h2>${query ? `Resultados para “${esc(query)}”` : 'O teu feed'}</h2></div>
+    <div class="chips">
+      <button class="chip ${filter === 'all' ? 'on' : ''}" data-f="all">Tudo</button>
+      ${S.interests.map(i => `<button class="chip ${filter === i.id ? 'on' : ''}" data-f="${i.id}">${i.prio ? '⚡ ' : ''}${esc(short(i.text))}</button>`).join('')}
+    </div>
+    ${Object.keys(ccs).length > 1 ? `<div class="chips" style="padding-top:0">
+      <button class="chip ${country === 'all' ? 'on' : ''}" data-country="all">🌍 Todos os países</button>
+      ${Object.entries(ccs).sort((a, b) => b[1] - a[1]).map(([c]) => `<button class="chip ${country === c ? 'on' : ''}" data-country="${c}">${flag(c)} ${cname(c)}</button>`).join('')}
+    </div>` : ''}
+    <div class="seg">
+      <button data-mode="parati" class="${mode === 'parati' ? 'on' : ''}">Para ti</button>
+      <button data-mode="recentes" class="${mode === 'recentes' ? 'on' : ''}">Recentes</button>
+      <button data-mode="naolidos" class="${mode === 'naolidos' ? 'on' : ''}">Novos</button>
+      <button data-mode="pais" class="${mode === 'pais' ? 'on' : ''}">Por país</button>
+    </div>
+    ${list.length ? groupBy(list).filter(([, xs]) => xs.length).map(([t, xs]) => `
+      <div class="group-h">${t}</div>
+      <div class="elist">${xs.map(x => artCard(x.a)).join('')}</div>`).join('')
+      : `<div class="empty"><div class="big">☕</div>${mode === 'naolidos' ? 'Já viste tudo o que é novo.' : 'Nada por aqui. Adiciona feeds ou muda o filtro.'}</div>`}
+    ${list.length ? `<div class="end"><span>❦</span><b>É tudo por agora.</b><small>Sem pressa — os artigos ficam aqui à tua espera.</small></div>` : ''}
+    <button class="btn soft block" id="pasteBtn" style="margin-top:8px">＋ Colar um artigo para testar</button>`;
+  },
+
+  fontes(){
+    return `
+    <div class="seg" style="margin-top:18px">
+      <button data-fsub="descobrir" class="${fsub === 'descobrir' ? 'on' : ''}">🌍 Descobrir</button>
+      <button data-fsub="tema" class="${fsub === 'tema' ? 'on' : ''}">🔎 Por tema</button>
+      <button data-fsub="seguir" class="${fsub === 'seguir' ? 'on' : ''}">A seguir · ${S.sources.length}</button>
+    </div>
+    ${fsub === 'descobrir' ? discoverView() : fsub === 'tema' ? topicView() : followingView()}`;
+  },
+
+  interesses(){
+    return `
+    <div class="sec"><h2>O que queres saber</h2></div>
+    <p class="sub">Escreve temas ou perguntas. Dão pontos aos artigos, escolhem as frases do resumo e criam a secção “O que querias saber”.</p>
+    <div class="inline"><input id="intText" placeholder="ex.: Como melhorar gráficos de barras"><button class="btn acc" id="addInt">＋</button></div>
+    <div class="rows" style="margin-top:12px">${S.interests.length ? S.interests.map(i => {
+      const n = S.articles.filter(a => analyse(a).matched.some(m => m.id === i.id)).length;
+      return `<div class="rowi"><button class="av" data-prio="${i.id}" style="${i.prio ? 'background:var(--accent)' : 'background:var(--bg2);color:var(--muted)'}" title="Prioridade">⚡</button>
+        <div class="grow"><b>${esc(i.text)}</b><small>${n} artigos · palavras: ${keywords(i.text).join(', ')}</small></div>
+        <button class="x" data-delint="${i.id}">×</button></div>`; }).join('') : '<div class="empty">Adiciona o primeiro interesse.</div>'}
+    </div>
+    <p class="sub" style="margin-top:10px">Toca em ⚡ para marcar como prioridade: esses artigos sobem para o topo.</p>
+    <div class="sec"><h2>Palavras silenciadas</h2></div>
+    <p class="sub">Artigos com estas palavras ficam escondidos.</p>
+    <div class="inline"><input id="muteText" placeholder="ex.: futebol"><button class="btn" id="addMute">Silenciar</button></div>
+    <div class="chips" style="flex-wrap:wrap;margin:0;padding:12px 0">${S.muted.map((m, i) => `<button class="chip" data-unmute="${i}">🔇 ${esc(m)} ×</button>`).join('') || '<span class="sub">Nenhuma.</span>'}</div>`;
+  },
+
+  biblioteca(){
+    const saved = S.articles.filter(a => S.saved[a.id]).sort((a, b) => S.saved[b.id] - S.saved[a.id]);
+    const hls = [...S.highlights].sort((a, b) => b.date - a.date);
+    return `
+    <div class="seg" style="margin-top:18px">
+      <button data-lib="guardados" class="${libMode === 'guardados' ? 'on' : ''}">Guardados · ${saved.length}</button>
+      <button data-lib="destaques" class="${libMode === 'destaques' ? 'on' : ''}">Destaques · ${hls.length}</button>
+    </div>
+    ${libMode === 'guardados' ? (saved.length ? `<div class="elist" style="margin:8px 0 12px">${saved.map(artCard).join('')}</div>` + `<button class="btn soft block" id="copyAll">${ICON.md.replace('<svg', '<svg width="18"')} Copiar tudo para o Marginália</button>`
+      : `<div class="empty"><div class="big">🔖</div>Toca no marcador de um artigo para o guardar.</div>`)
+    : (hls.length ? hls.map(h => { const a = S.articles.find(x => x.id === h.articleId); return `
+      <div class="hlcard fade"><q>${esc(h.text)}</q>
+        <div class="from"><span data-open="${a ? a.id : ''}" style="cursor:pointer">${a ? esc(src(a.sourceId).name) + ' · ' + esc(short(a.title)) : 'Artigo removido'}</span>
+        <button class="x" data-delhl="${h.id}">×</button></div></div>`; }).join('') + `<button class="btn soft block" id="copyHl">Copiar destaques como Markdown</button>`
+      : `<div class="empty"><div class="big">✦</div>Seleciona texto dentro de um artigo e toca em “Destacar”.</div>`)}`;
+  }
+};
+
+function render(){
+  $('#view').innerHTML = views[tab]();
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+}
+
+/* ================= Leitor ================= */
+let current = null, speaking = false;
+function markText(text, kws, hls){
+  let h = esc(text);
+  for (const x of hls){ const e = esc(x.text); if (e && h.includes(e)) h = h.split(e).join(`<mark class="hl">${e}</mark>`); }
+  if (kws.length) h = h.replace(/(<[^>]+>)|([A-Za-zÀ-ÿ0-9]+)/g, (m, tag, w) => tag ? tag : (kws.some(k => stem(norm(w)).startsWith(k)) ? `<mark class="kw">${w}</mark>` : w));
+  return h;
+}
+function paragraphs(t){
+  if (t.includes('\n')) return t.split(/\n{2,}|\n/).map(p => p.trim()).filter(Boolean);
+  const s = sentences(t), out = []; for (let i = 0; i < s.length; i += 3) out.push(s.slice(i, i + 3).join(' ')); return out;
+}
+function openReader(id){
+  const a = S.articles.find(x => x.id === id); if (!a) return;
+  current = id; S.read[id] = S.read[id] || Date.now(); save(); stopSpeak();
+  const r = analyse(a), s = src(a.sourceId);
+  const hls = S.highlights.filter(h => h.articleId === id);
+  const related = S.articles.filter(x => x.id !== id && analyse(x).matched.some(m => r.matched.some(n => n.id === m.id))).slice(0, 5);
+  $('#rActions').innerHTML = `
+    <button class="ibtn" id="speakBtn" title="Ouvir">${ICON.play}</button>
+    <button class="ibtn" id="sizeBtn" title="Tamanho do texto">${ICON.aa}</button>
+    <button class="ibtn" data-md="${id}" title="Copiar como Markdown">${ICON.md}</button>
+    <button class="ibtn" data-save="${id}" style="color:${S.saved[id] ? 'var(--accent)' : 'inherit'}" title="Guardar">${S.saved[id] ? ICON.bmOn : ICON.bm}</button>`;
+  $('#rwrap').innerHTML = `
+    <div class="rcover" style="${grad(s.color, hash(a.id))}">${a.image ? `<img src="${esc(a.image)}" alt="" onerror="this.remove()">` : ''}</div>
+    <div class="rmeta"><span class="dot" style="background:${s.color}"></span>${esc(s.name)} <span style="color:var(--muted)">· ${ago(a.date)} · ${readMin(a.content)} min</span>${r.score ? `<span class="ring" style="--p:${r.score};margin-left:auto" data-v="${r.score}"></span>` : ''}</div>
+    <h1>${esc(a.title)}</h1>
+    ${r.matched.length ? `<div class="tags">${r.matched.map(m => `<span class="tg ${m.prio ? 'prio' : ''}">${m.prio ? '⚡ ' : '✦ '}${esc(m.text)}</span>`).join('')}</div>` : ''}
+    <div class="box sum"><h4>${ICON.clock.replace('<svg', '<svg width="15"')} Em 30 segundos</h4><ul>${r.summary.map(x => `<li>${markText(x, r.allK, [])}</li>`).join('')}</ul></div>
+    ${r.answers.length ? `<div class="box ans"><h4>✦ O que querias saber</h4>${r.answers.map(x => `<div class="q">${esc(x.q)}</div><div class="a">${markText(x.a, r.allK, [])}</div>`).join('')}</div>` : ''}
+    <div class="divider">Artigo completo</div>
+    <div class="rbody" id="rbody">${paragraphs(a.content).map(p => `<p>${markText(p, r.allK, hls)}</p>`).join('')}</div>
+    ${a.url ? `<p style="margin-top:20px"><a href="${esc(a.url)}" target="_blank" rel="noopener" class="btn soft block" style="text-decoration:none">Abrir no site original ↗</a></p>` : ''}
+    ${related.length ? `<div class="divider">Também te pode interessar</div><div class="related">${related.map(x => `<div class="rc" data-open="${x.id}"><div class="src"><span class="dot" style="background:${src(x.sourceId).color}"></span>${esc(src(x.sourceId).name)}</div><b>${esc(x.title)}</b></div>`).join('')}</div>` : ''}`;
+  const rd = $('#reader'); rd.classList.add('open'); rd.scrollTop = 0; $('#prog').style.width = '0';
+  document.body.style.overflow = 'hidden';
+}
+function closeReader(){ $('#reader').classList.remove('open'); document.body.style.overflow = ''; stopSpeak(); current = null; $('#hlBtn').classList.remove('show'); render(); }
+$('#reader').addEventListener('scroll', e => { const el = e.target; $('#prog').style.width = (el.scrollTop / Math.max(1, el.scrollHeight - el.clientHeight) * 100) + '%'; });
+
+function speak(){
+  try {
+    if (speaking){ stopSpeak(); return; }
+    const a = S.articles.find(x => x.id === current); if (!a || !window.speechSynthesis) throw 0;
+    const u = new SpeechSynthesisUtterance(a.title + '. ' + a.content.replace(/\n+/g, ' '));
+    u.lang = 'pt-PT'; u.rate = 1; u.onend = stopSpeak;
+    speechSynthesis.speak(u); speaking = true; $('#speakBtn').style.color = 'var(--accent)'; toast('A ler em voz alta… toca outra vez para parar');
+  } catch(e){ toast('A leitura em voz alta não está disponível aqui.'); }
+}
+function stopSpeak(){ try { speechSynthesis.cancel(); } catch(e){} speaking = false; const b = $('#speakBtn'); if (b) b.style.color = ''; }
+
+// destaques: seleção de texto
+document.addEventListener('selectionchange', () => {
+  const sel = window.getSelection(); const t = sel ? sel.toString().trim() : '';
+  const inBody = sel && sel.rangeCount && $('#rbody')?.contains(sel.anchorNode);
+  $('#hlBtn').classList.toggle('show', !!(current && inBody && t.length > 8));
+});
+$('#hlBtn').addEventListener('click', () => {
+  const t = window.getSelection().toString().trim().replace(/\s+/g, ' ');
+  if (!t || !current) return;
+  S.highlights.push({ id: uid(), articleId: current, text: t, date: Date.now() }); save();
+  window.getSelection().removeAllRanges(); $('#hlBtn').classList.remove('show');
+  const top = $('#reader').scrollTop; openReader(current); $('#reader').scrollTop = top; toast('✦ Destaque guardado na Biblioteca');
+});
+
+/* ================= Markdown / copiar ================= */
+function toMd(a){
+  const r = analyse(a), s = src(a.sourceId), hls = S.highlights.filter(h => h.articleId === a.id);
+  return `# ${a.title}\n\n> Fonte: ${s.name}${a.url ? ` — ${a.url}` : ''}  \n> Data: ${new Date(a.date).toLocaleDateString('pt-PT')}  \n> Interesses: ${r.matched.map(m => m.text).join(', ') || '—'}\n\n## Em 30 segundos\n${r.summary.map(x => `- ${x}`).join('\n')}\n`
+    + (r.answers.length ? `\n## O que querias saber\n${r.answers.map(x => `- **${x.q}:** ${x.a}`).join('\n')}\n` : '')
+    + (hls.length ? `\n## Destaques\n${hls.map(h => `> ${h.text}`).join('\n\n')}\n` : '');
+}
+async function copy(text){
+  try { await navigator.clipboard.writeText(text); toast('Copiado! Já podes colar no Marginália.'); }
+  catch(e){ sheet(`<h2>Copiar</h2><p class="sub">Seleciona tudo e copia:</p><textarea style="min-height:280px;font-family:monospace;font-size:13px">${esc(text)}</textarea>`); }
+}
+function opml(){
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<opml version="2.0"><head><title>Leitura — feeds</title></head><body>\n${S.sources.map(s => `  <outline type="rss" text="${esc(s.name)}" xmlUrl="${esc(s.url)}"/>`).join('\n')}\n</body></opml>`;
+}
+
+/* ================= Sheets ================= */
+function sheet(html){ $('#sheet').innerHTML = html; $('#modal').classList.add('open'); }
+function closeSheet(){ $('#modal').classList.remove('open'); }
+function settingsSheet(){
+  const th = S.settings.theme;
+  sheet(`<h2>Ajustes</h2><p class="sub">Aparência e dados.</p>
+    <div class="stack">
+      <b>Tema</b>
+      <div class="opts"><button data-theme-set="" class="${th === '' ? 'on' : ''}">☀︎ Claro</button><button data-theme-set="sepia" class="${th === 'sepia' ? 'on' : ''}">📜 Sépia</button><button data-theme-set="dark" class="${th === 'dark' ? 'on' : ''}">☾ Escuro</button></div>
+      <b>Tamanho do texto no leitor</b>
+      <div class="opts">${[17, 19, 21, 23].map(n => `<button data-size="${n}" class="${S.settings.size === n ? 'on' : ''}" style="font-size:${n - 4}px">Aa</button>`).join('')}</div>
+      <b>Feeds</b>
+      <button class="btn soft block" id="exportOpml">Exportar feeds (OPML)</button>
+      <b>Dados</b>
+      <button class="btn soft block" id="markAll">Marcar tudo como lido</button>
+      <button class="btn soft block" id="resetBtn">Repor dados de exemplo</button>
+    </div>`);
+}
+function pasteSheet(){
+  sheet(`<h2>Colar um artigo</h2><p class="sub">Cola o texto de qualquer artigo para ver o resumo, a relevância e os destaques.</p>
+    <div class="stack"><input id="pTitle" placeholder="Título"><input id="pUrl" placeholder="Link (opcional)" inputmode="url"><textarea id="pText" placeholder="Texto do artigo…"></textarea>
+    <button class="btn acc block" id="pSave">Analisar artigo</button></div>`);
+}
+function xmlSheet(){
+  sheet(`<h2>Colar XML de um feed</h2><p class="sub">Abre o link RSS no navegador, copia todo o conteúdo da página e cola aqui.</p>
+    <div class="stack"><input id="xName" placeholder="Nome do feed (opcional)"><input id="xUrl" placeholder="Link do feed (opcional)"><textarea id="xText" placeholder="<rss>…</rss>" style="font-family:monospace;font-size:12px"></textarea>
+    <button class="btn acc block" id="xSave">Importar artigos</button></div>`);
+}
+function importXml(text, name, url){
+  if (/<opml/i.test(text)){
+    const doc = new DOMParser().parseFromString(text, 'text/xml'); let n = 0;
+    doc.querySelectorAll('outline[xmlUrl]').forEach(o => { const u = o.getAttribute('xmlUrl'); if (!S.sources.some(s => s.url === u)){ S.sources.push({ id: uid(), name: o.getAttribute('text') || o.getAttribute('title') || new URL(u).hostname, url: u, color: PALETTE[S.sources.length % PALETTE.length] }); n++; } });
+    save(); render(); toast(`${n} feeds importados do OPML`); return;
+  }
+  let s = S.sources.find(x => url && x.url === url);
+  const tmp = s || { id: uid(), name: name || 'Feed importado', url: url || '', color: PALETTE[S.sources.length % PALETTE.length] };
+  const f = parseFeed(text, tmp);
+  if (!s){ if (f.title && !name) tmp.name = f.title; S.sources.push(tmp); }
+  const n = addItems(f.items); save(); tab = 'hoje'; mode = 'recentes'; render(); toast(`✓ ${n} artigos importados de ${tmp.name}`);
+}
+function addSource(url, name, color, cc, lang){
+  if (!/^https?:\/\//.test(url)) url = 'https://' + url;
+  if (S.sources.some(s => s.url === url)) { toast('Já segues este feed'); return; }
+  let host = url; try { host = new URL(url).hostname.replace(/^www\./, ''); } catch(e){}
+  const s = { id: uid(), name: name || host, url, color: color || PALETTE[S.sources.length % PALETTE.length], cc: cc || '', lang: lang || '' };
+  S.sources.push(s); save(); render(); toast(`A seguir ${s.name}`);
+  fetchFeed(s).then(f => { if (!name && f.title) s.name = f.title; const n = addItems(f.items); save(); render(); toast(`${n} artigos de ${s.name}`); })
+    .catch(async () => { // talvez seja um site e não um feed: procurar o feed na página
+      try { const f = (await discoverFeeds(url))[0]; if (f){ s.url = f.url; const r = await fetchFeed(s); if (r.title) s.name = r.title; addItems(r.items); save(); render(); toast(`Feed encontrado: ${s.name}`); } } catch(e){} });
+}
+
+/* ================= Eventos ================= */
+document.addEventListener('click', e => {
+  if (e.target.id === 'modal'){ closeSheet(); return; }
+  const t = e.target.closest('[data-tab],[data-f],[data-mode],[data-lib],[data-open],[data-save],[data-md],[data-close-reader],[data-delsrc],[data-delint],[data-prio],[data-unmute],[data-delhl],[data-addfeed],[data-addcat],[data-fsub],[data-dcat],[data-websearch],[data-webfollow],[data-region],[data-dlang],[data-gemtoggle],[data-follow],[data-followcc],[data-gnews],[data-tc],[data-tsug],[data-country],[data-theme-set],[data-size],button');
+  if (!t) return;
+  const d = t.dataset;
+  if (d.save){ e.stopPropagation(); S.saved[d.save] ? delete S.saved[d.save] : S.saved[d.save] = Date.now(); save(); toast(S.saved[d.save] ? '🔖 Guardado na Biblioteca' : 'Removido dos guardados'); if (current) { const top = $('#reader').scrollTop; openReader(current); $('#reader').scrollTop = top; } else render(); return; }
+  if (d.open){ openReader(d.open); return; }
+  if (d.tab){ tab = d.tab; query = ''; $('#q').value = ''; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+  if (d.f){ filter = d.f; render(); return; }
+  if (d.mode){ mode = d.mode; render(); return; }
+  if (d.lib){ libMode = d.lib; render(); return; }
+  if (d.md){ copy(toMd(S.articles.find(a => a.id === d.md))); return; }
+  if ('closeReader' in d){ closeReader(); return; }
+  if (d.delsrc){ const s = S.sources.find(x => x.id === d.delsrc); S.sources = S.sources.filter(x => x.id !== d.delsrc); save(); render(); toast(`Deixaste de seguir ${s?.name}`); return; }
+  if (d.delint){ S.interests = S.interests.filter(i => i.id !== d.delint); if (filter === d.delint) filter = 'all'; save(); render(); return; }
+  if (d.prio){ const i = S.interests.find(x => x.id === d.prio); i.prio = !i.prio; save(); render(); toast(i.prio ? '⚡ Marcado como prioridade' : 'Prioridade removida'); return; }
+  if (d.unmute !== undefined){ S.muted.splice(+d.unmute, 1); save(); render(); return; }
+  if (d.delhl){ S.highlights = S.highlights.filter(h => h.id !== d.delhl); save(); render(); return; }
+  if (d.addfeed){ addSource(d.addfeed, d.name, d.color); return; }
+  if (d.fsub){ fsub = d.fsub; render(); return; }
+  if (d.dcat){ dCat = d.dcat; keepScroll(render); return; }
+  if ('websearch' in d){ webSearch(dQuery.trim()); return; }
+  if (d.webfollow !== undefined){ followWeb(+d.webfollow); return; }
+  if (d.region){ dRegion = d.region; keepScroll(render); return; }
+  if (d.dlang){ dLang = d.dlang; render(); return; }
+  if ('gemtoggle' in d){ dGem = !dGem; render(); return; }
+  if (d.country){ country = d.country; render(); return; }
+  if (d.follow !== undefined){ followOutlet(OUTLETS[+d.follow]); save(); keepScroll(render); return; }
+  if (d.followcc){ let n = 0; d.ids.split(',').forEach(i => { if (followOutlet(OUTLETS[+i], true)) n++; }); save(); keepScroll(render); toast(`${flag(d.followcc)} A seguir ${n} jornais de ${cname(d.followcc)}`); return; }
+  if (d.gnews){ const u = gnewsUrl(d.gnews); if (followed(u)) { toast('Já segues estas manchetes'); return; } S.sources.push({ id: uid(), name: `Manchetes · ${cname(d.gnews)}`, url: u, cc: d.gnews, color: PALETTE[S.sources.length % PALETTE.length] }); save(); keepScroll(render); toast(`${flag(d.gnews)} A seguir as manchetes de ${cname(d.gnews)}`); return; }
+  if (d.tc){ S.settings.tq = $('#tq').value.trim(); S.settings.tc = d.tc; save(); keepScroll(render); return; }
+  if (d.tsug){ S.settings.tq = d.tsug; save(); keepScroll(render); return; }
+  if (d.themeSet !== undefined){ S.settings.theme = d.themeSet; applySettings(); save(); settingsSheet(); return; }
+  if (d.size){ S.settings.size = +d.size; applySettings(); save(); settingsSheet(); return; }
+  switch (t.id){
+    case 'searchBtn': { const b = $('#searchBox'); b.classList.toggle('open'); if (b.classList.contains('open')){ tab = 'hoje'; render(); $('#q').focus(); } else { query = ''; $('#q').value = ''; render(); } break; }
+    case 'refreshBtn': refreshAll(false); break;
+    case 'settingsBtn': settingsSheet(); break;
+    case 'speakBtn': speak(); break;
+    case 'sizeBtn': { const z = [17, 19, 21, 23]; S.settings.size = z[(z.indexOf(S.settings.size) + 1) % z.length]; applySettings(); save(); toast(`Tamanho do texto: ${S.settings.size}px`); break; }
+    case 'followTopic': { const q = $('#tq').value.trim(), cc = S.settings.tc || 'PT'; if (!q) return toast('Escreve um tema primeiro'); const u = gnewsUrl(cc, q); if (followed(u)) return toast('Já segues este tema'); S.sources.push({ id: uid(), name: `${q} · ${cname(cc)}`, url: u, cc, topic: true, color: PALETTE[S.sources.length % PALETTE.length] }); S.settings.tq = ''; save(); render(); toast(`🔎 A seguir “${q}” em ${flag(cc)} ${cname(cc)}`); break; }
+    case 'addSrc': { const u = $('#srcUrl').value.trim(); if (!u) return toast('Cola o link de um feed RSS'); addSource(u); break; }
+    case 'pasteXml': xmlSheet(); break;
+    case 'xSave': { const x = $('#xText').value.trim(); if (!x) return; try { importXml(x, $('#xName').value.trim(), $('#xUrl').value.trim()); closeSheet(); } catch(err){ toast('Não consegui ler esse XML. Confirma se copiaste a página toda.'); } break; }
+    case 'addInt': { const v = $('#intText').value.trim(); if (!v) return; S.interests.push({ id: uid(), text: v, prio: false }); save(); render(); toast('✦ Interesse adicionado'); break; }
+    case 'addMute': { const v = $('#muteText').value.trim(); if (!v) return; S.muted.push(v); save(); render(); toast(`🔇 “${v}” silenciado`); break; }
+    case 'pasteBtn': pasteSheet(); break;
+    case 'pSave': { const c = $('#pText').value.trim(); if (c.length < 40) return toast('Cola um texto um pouco maior'); const a = { id: uid(), sourceId: null, title: $('#pTitle').value.trim() || c.slice(0, 70) + '…', url: $('#pUrl').value.trim(), date: Date.now(), content: c }; S.articles.push(a); save(); closeSheet(); render(); openReader(a.id); break; }
+    case 'copyAll': copy(S.articles.filter(a => S.saved[a.id]).map(toMd).join('\n---\n\n')); break;
+    case 'copyHl': copy('# Destaques\n\n' + S.highlights.map(h => { const a = S.articles.find(x => x.id === h.articleId); return `> ${h.text}\n\n— ${a ? `*${a.title}* (${src(a.sourceId).name})` : ''}`; }).join('\n\n')); break;
+    case 'exportOpml': copy(opml()); break;
+    case 'markAll': S.articles.forEach(a => S.read[a.id] ||= Date.now()); save(); closeSheet(); render(); toast('Tudo marcado como lido'); break;
+    case 'resetBtn': S = demo(); cache.clear(); save(); applySettings(); closeSheet(); tab = 'hoje'; filter = 'all'; render(); toast('Dados de exemplo repostos'); break;
+  }
+});
+document.addEventListener('change', async e => {
+  if (e.target.id === 'fileIn' && e.target.files[0]){
+    const f = e.target.files[0];
+    try { importXml(await f.text(), '', ''); } catch(err){ toast('Este ficheiro não parece um feed RSS, Atom ou OPML.'); }
+    e.target.value = '';
+  }
+});
+document.addEventListener('keydown', e => {
+  const map = { intText: 'addInt', srcUrl: 'addSrc', muteText: 'addMute' };
+  if (e.key === 'Enter' && e.target.id === 'tq') $('#followTopic').click();
+  if (e.key === 'Enter' && e.target.id === 'dq' && dQuery.trim().length >= 2) webSearch(dQuery.trim());
+  if (e.key === 'Enter' && map[e.target.id]) $('#' + map[e.target.id]).click();
+  if (e.key === 'Escape'){ if ($('#modal').classList.contains('open')) closeSheet(); else if (current) closeReader(); }
+});
+document.addEventListener('input', e => {
+  if (e.target.id === 'dq'){ dQuery = e.target.value; const r = $('#discRes'); if (r) r.innerHTML = discResults(); }
+  if (e.key === undefined && false){}
+  if (e.target.id === 'tq'){ S.settings.tq = e.target.value; const b = $('#followTopic'); if (b) b.textContent = `Seguir “${e.target.value || '…'}” em ${flag(S.settings.tc || 'PT')} ${cname(S.settings.tc || 'PT')}`; }
+});
+function keepScroll(fn){ const y = window.scrollY; fn(); window.scrollTo(0, y); }
+$('#q').addEventListener('input', e => { query = e.target.value.trim(); tab = 'hoje'; render(); });
+
+function applySettings(){
+  document.documentElement.dataset.theme = S.settings.theme || '';
+  document.documentElement.style.setProperty('--read-size', S.settings.size + 'px');
+}
+function greet(){
+  const h = new Date().getHours();
+  $('#greet').textContent = h < 6 ? 'Boa noite' : h < 13 ? 'Bom dia' : h < 20 ? 'Boa tarde' : 'Boa noite';
+  $('#today').textContent = new Date().toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long' });
+}
+
+load(); applySettings(); greet(); render();
+if (isApp){
+  document.body.classList.add('is-app');
+  // links externos abrem no navegador do sistema
+  document.addEventListener('click', e => { const a = e.target.closest('a[target="_blank"]'); if (a){ e.preventDefault(); window.__TAURI__.opener?.openUrl(a.href); } }, true);
+  // atualizar ao abrir e a cada 30 minutos
+  refreshAll(true); setInterval(() => refreshAll(true), 30 * 60e3);
+}
+</script>
+</body>
+</html>
