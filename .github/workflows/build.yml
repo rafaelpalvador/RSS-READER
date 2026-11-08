@@ -45,9 +45,12 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-      - uses: android-actions/setup-android@v3
-      - name: Instalar NDK
-        run: sdkmanager "ndk;27.0.12077973"
+      - name: Usar o Android SDK e o NDK já instalados na máquina
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          NDK=$(ls -d $ANDROID_HOME/ndk/*/ | sort -V | tail -1)
+          echo "NDK escolhido: $NDK"
+          echo "NDK_HOME=${NDK%/}" >> $GITHUB_ENV
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: aarch64-linux-android
@@ -57,8 +60,6 @@ jobs:
       - run: npm install
       - run: node scripts/set-version.mjs ${{ env.APP_VERSION }}
       - name: Criar projeto Android
-        env:
-          NDK_HOME: ${{ env.ANDROID_SDK_ROOT }}/ndk/27.0.12077973
         run: npx tauri android init --ci
       - run: npx tauri icon app-icon.png
       - name: Configurar assinatura
@@ -83,8 +84,6 @@ jobs:
           sed -i 's/^ *//' src-tauri/gen/android/keystore.properties
           python3 scripts/android-signing.py
       - name: Compilar APK
-        env:
-          NDK_HOME: ${{ env.ANDROID_SDK_ROOT }}/ndk/27.0.12077973
         run: npx tauri android build --apk --target aarch64
       - name: Renomear APK
         run: |
