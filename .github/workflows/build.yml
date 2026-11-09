@@ -62,6 +62,8 @@ jobs:
       - name: Criar projeto Android
         run: npx tauri android init --ci
       - run: npx tauri icon app-icon.png
+      - name: Adicionar widget
+        run: python3 scripts/android-widget.py
       - name: Configurar assinatura
         env:
           KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}

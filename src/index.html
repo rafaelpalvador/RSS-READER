@@ -362,6 +362,25 @@ body::before{content:"";position:fixed;top:0;left:0;right:0;height:var(--st);bac
 .cdesc{color:var(--ink2);font-size:14.5px;margin:10px 0 0;line-height:1.45}
 .cact{display:flex;gap:8px;margin:16px 0 6px}
 .cact .btn{padding:11px 18px;border-radius:99px;font-size:14px}
+
+/* v10 — artigo completo, gestos, duplicados */
+.fullbar{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--card);box-shadow:var(--shadow);border-radius:16px;padding:10px 12px 10px 14px;margin:-4px 0 18px;font-size:13px;font-weight:600;color:var(--ink2)}
+.fullbar .wload i{width:6px;height:6px}
+.alsoin{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:-6px 0 16px;font-size:13px;color:var(--muted)}
+.alsoin .pill{padding:5px 10px;font-size:12px}
+.dup{font-size:11.5px;font-weight:700;color:var(--muted);background:var(--bg2);padding:3px 8px;border-radius:99px;white-space:nowrap}
+.nextcard{margin:26px 0 8px;padding:16px 18px;border-radius:20px;background:linear-gradient(135deg,var(--accent-soft),rgba(123,92,255,.12));cursor:pointer}
+.nextcard small{display:block;font-size:11.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.nextcard b{display:block;font-family:Newsreader,serif;font-weight:500;font-size:19px;line-height:1.3;margin:6px 0 4px}
+.nextcard span{font-size:12px;color:var(--muted);font-weight:600}
+.erow{position:relative;background:var(--card);will-change:transform}
+.elist{overflow:hidden}
+.erow.sw-r,.erow.sw-l{box-shadow:0 0 0 1px var(--line)}
+.erow.sw-r::before,.erow.sw-l::before{content:attr(data-swipe);position:absolute;top:0;bottom:0;width:140px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;border-radius:16px;opacity:.55;transition:opacity .15s}
+.erow.sw-r::before{right:100%;margin-right:4px;background:var(--accent)}
+.erow.sw-l::before{left:100%;margin-left:4px;background:#13b38b}
+.erow.sw-go::before{opacity:1}
+.sheet .stack > b{display:block;margin-top:14px}
 </style>
 </head>
 <body>
@@ -656,7 +675,7 @@ const isMuted = a => S.muted.some(m => m && norm(a.title + ' ' + a.content).incl
 
 const cache = new Map();
 function analyse(a){
-  const ck = a.id + '|' + S.interests.map(i => i.text + i.prio).join();
+  const ck = a.id + '|' + a.content.length + '|' + S.interests.map(i => i.text + i.prio).join();
   if (cache.has(ck)) return cache.get(ck);
   const ints = S.interests.map(i => ({ ...i, kws: keywords(i.text) }));
   const allK = [...new Set(ints.flatMap(i => i.kws))];
@@ -712,7 +731,7 @@ async function refreshAll(silent){
   if (!silent) toast('A procurar novidades nos teus feeds…');
   let ok = 0, n = 0;
   for (const s of S.sources){ try { const f = await fetchFeed(s); n += addItems(f.items); s.last = Date.now(); ok++; } catch(e){} }
-  save(); if (!current) render();
+  save(); if (!current) render(); updateWidget();
   if (!silent || !ok) toast(ok ? `${n} artigos novos de ${ok} feeds` : (isApp ? 'Sem ligação aos feeds. Verifica a internet.' : 'Neste protótipo a internet está bloqueada. No app instalado, isto atualiza os feeds reais.'));
 }
 
@@ -747,6 +766,7 @@ function artCard(a){
       <h3>${esc(a.title)}</h3>
       <div class="foot">
         ${top ? `<span class="why ${top.prio ? 'prio' : ''}">${top.prio ? '⚡' : '✦'} ${esc(top.text)}</span>` : `<span>${readMin(a.content)} min de leitura</span>`}
+        ${dupOf[a.id]?.length ? `<span class="dup" title="${esc(dupOf[a.id].map(d => src(d.sourceId).name).join(', '))}">+${dupOf[a.id].length} ${dupOf[a.id].length === 1 ? 'fonte' : 'fontes'}</span>` : ''}
         <span class="sp"></span>
         <button class="bm ${S.saved[a.id] ? 'on' : ''}" data-save="${a.id}" title="Guardar">${S.saved[a.id] ? ICON.bmOn : ICON.bm}</button>
       </div>
@@ -1016,6 +1036,7 @@ function renderChan(){
     : chan.state === 'offline' ? `<div class="empty"><div class="big">📡</div>${isApp ? 'Não consegui carregar as notícias deste canal agora.' : 'No protótipo a internet está bloqueada. No app instalado, aqui aparecem as últimas notícias do canal antes de o seguires.'}</div>`
     : !arts.length ? `<div class="empty"><div class="big">🗞️</div>Ainda não há notícias deste canal.<br>Toca em ↻ para atualizar.</div>`
     : `<div class="elist">${arts.map(artCard).join('')}</div>`;
+  readingList = arts.map(a => a.id);
   $('#chanIn').innerHTML = `
     <div class="cban" style="${grad(s.color, hash(s.name))}"><div class="grain"></div>
       <div class="cbar"><button class="ibtn" data-chanclose title="Voltar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg></button>
@@ -1049,6 +1070,54 @@ function chanFollow(){
   save(); renderChan();
 }
 
+/* ================= Widget do Android ================= */
+function updateWidget(){
+  const inv = window.__TAURI__?.core?.invoke; if (!inv) return;
+  const items = S.articles.filter(a => !S.read[a.id] && !isMuted(a) && S.sources.some(s => s.id === a.sourceId))
+    .map(a => ({ a, r: analyse(a) })).sort((x, y) => y.r.score - x.r.score || y.a.date - x.a.date).slice(0, 4)
+    .map(x => ({ t: x.a.title, s: src(x.a.sourceId).name + ' · ' + ago(x.a.date) }));
+  inv('update_widget', { json: JSON.stringify({ title: 'Leitura · Para ti', items }) }).catch(() => {});
+}
+document.addEventListener('visibilitychange', () => { if (document.hidden) updateWidget(); });
+/* ================= Gestos nos cartões ================= */
+// deslizar para a direita = guardar · para a esquerda = marcar como lido/por ler
+let swiped = false;
+(() => { let el, x0, y0, dx = 0, mode = 0;
+  document.addEventListener('touchstart', e => { el = e.target.closest('.erow'); if (!el) return; x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; dx = 0; mode = 0; }, { passive: true });
+  document.addEventListener('touchmove', e => { if (!el) return; const mx = e.touches[0].clientX - x0, my = e.touches[0].clientY - y0;
+    if (!mode){ if (Math.abs(mx) > 12 && Math.abs(mx) > Math.abs(my) * 1.4) mode = 1; else if (Math.abs(my) > 10) { el = null; return; } else return; }
+    dx = Math.max(-140, Math.min(140, mx)); el.style.transition = 'none'; el.style.transform = `translateX(${dx}px)`;
+    const id = el.dataset.open;
+    el.dataset.swipe = dx > 0 ? (S.saved[id] ? '✕ Remover' : '🔖 Guardar') : (S.read[id] ? '○ Por ler' : '✓ Lido');
+    el.classList.toggle('sw-r', dx > 0); el.classList.toggle('sw-l', dx < 0); el.classList.toggle('sw-go', Math.abs(dx) > 90); }, { passive: true });
+  document.addEventListener('touchend', () => { if (!el) return; const id = el.dataset.open, row = el; el = null;
+    row.style.transition = 'transform .25s'; row.style.transform = ''; setTimeout(() => row.classList.remove('sw-r', 'sw-l', 'sw-go'), 250);
+    if (mode !== 1) return; swiped = true; setTimeout(() => swiped = false, 350);
+    if (dx > 90){ S.saved[id] ? delete S.saved[id] : S.saved[id] = Date.now(); toast(S.saved[id] ? '🔖 Guardado' : 'Removido dos guardados'); }
+    else if (dx < -90){ S.read[id] ? delete S.read[id] : S.read[id] = Date.now(); toast(S.read[id] ? '✓ Marcado como lido' : '○ Marcado como por ler'); }
+    else return;
+    save(); setTimeout(() => { const y = window.scrollY; render(); if (chan) renderChan(); window.scrollTo(0, y); updateWidget(); }, 260);
+  });
+})();
+/* ================= Notícias repetidas ================= */
+// A mesma notícia em vários jornais aparece uma só vez, com "também em: …"
+const dupOf = {};
+function dedupe(list){
+  const toks = list.map(x => new Set(keywords(x.a.title)));
+  const keep = [], used = new Set();
+  for (let i = 0; i < list.length; i++){
+    if (used.has(i)) continue;
+    const grp = [list[i]];
+    for (let j = i + 1; j < list.length; j++){
+      if (used.has(j) || list[j].a.sourceId === list[i].a.sourceId || Math.abs(list[j].a.date - list[i].a.date) > 3 * DAY) continue;
+      const A = toks[i], B = toks[j]; if (A.size < 3 || B.size < 3) continue;
+      let inter = 0; A.forEach(w => B.has(w) && inter++);
+      if (inter / Math.min(A.size, B.size) >= 0.6 && inter >= 3){ grp.push(list[j]); used.add(j); }
+    }
+    keep.push(list[i]); dupOf[list[i].a.id] = grp.slice(1).map(x => x.a);
+  }
+  return keep;
+}
 /* ================= Vistas ================= */
 let tab = 'hoje', filter = 'all', mode = 'parati', libMode = 'guardados', query = '';
 
@@ -1065,6 +1134,7 @@ const views = {
     if (mode === 'parati') list.sort((x, y) => y.r.score - x.r.score || y.a.date - x.a.date);
     if (mode === 'recentes') list.sort((x, y) => y.a.date - x.a.date);
     if (mode === 'naolidos') list = list.filter(x => !S.read[x.a.id]).sort((x, y) => y.a.date - x.a.date);
+    if (S.settings.dedupe !== false) list = dedupe(list);
     const showTop = !query && filter === 'all' && country === 'all';
     const hero = showTop && top[0];
     const picks = showTop ? top.slice(1, 6) : [];
@@ -1101,6 +1171,7 @@ const views = {
       <button data-mode="naolidos" class="${mode === 'naolidos' ? 'on' : ''}">Novos</button>
       <button data-mode="pais" class="${mode === 'pais' ? 'on' : ''}">Por país</button>
     </div>
+    ${(readingList = groupBy(list).flatMap(([, xs]) => xs.map(x => x.a.id)), '')}
     ${list.length ? groupBy(list).filter(([, xs]) => xs.length).map(([t, xs]) => `
       <div class="group-h">${t}</div>
       <div class="elist">${xs.map(x => artCard(x.a)).join('')}</div>`).join('')
@@ -1173,8 +1244,9 @@ function paragraphs(t){
   if (t.includes('\n')) return t.split(/\n{2,}|\n/).map(p => p.trim()).filter(Boolean);
   const s = sentences(t), out = []; for (let i = 0; i < s.length; i += 3) out.push(s.slice(i, i + 3).join(' ')); return out;
 }
-function openReader(id){
+function openReader(id, keep){
   const a = findArt(id); if (!a) return;
+  if (!keep && current !== id) fullTried = false;
   current = id; S.read[id] = S.read[id] || Date.now(); save(); stopSpeak();
   const r = analyse(a), s = src(a.sourceId);
   const hls = S.highlights.filter(h => h.articleId === id);
@@ -1192,12 +1264,62 @@ function openReader(id){
     <div class="box sum"><h4>${ICON.clock.replace('<svg', '<svg width="15"')} Em 30 segundos</h4><ul>${r.summary.map(x => `<li>${markText(x, r.allK, [])}</li>`).join('')}</ul></div>
     ${r.answers.length ? `<div class="box ans"><h4>✦ O que querias saber</h4>${r.answers.map(x => `<div class="q">${esc(x.q)}</div><div class="a">${markText(x.a, r.allK, [])}</div>`).join('')}</div>` : ''}
     <div class="divider">Artigo completo</div>
+    ${dupOf[id]?.length ? `<div class="alsoin"><b>Também em:</b> ${dupOf[id].map(d => `<button class="pill" data-open="${d.id}">${esc(src(d.sourceId).name)}</button>`).join('')}</div>` : ''}
+    ${a.url && !a.full ? `<div class="fullbar" id="fullBar">${isApp && fullTried === 'loading' ? '<span class="wload" style="padding:0"><i></i><i></i><i></i></span> A carregar o artigo completo do site…' : `<span>📄 Este feed pode mostrar só um resumo.</span><button class="pill acc" data-full="${id}">Carregar texto completo</button>`}</div>` : ''}
     <div class="rbody" id="rbody">${paragraphs(a.content).map(p => `<p>${markText(p, r.allK, hls)}</p>`).join('')}</div>
     ${a.url ? `<p style="margin-top:20px"><a href="${esc(a.url)}" target="_blank" rel="noopener" class="btn soft block" style="text-decoration:none">Abrir no site original ↗</a></p>` : ''}
+    ${(() => { const nx = neighbour(id, 1); return nx ? `<div class="nextcard" data-open="${nx.id}"><small>Próximo artigo →</small><b>${esc(nx.title)}</b><span>${esc(src(nx.sourceId).name)} · desliza para a esquerda</span></div>` : ''; })()}
     ${related.length ? `<div class="divider">Também te pode interessar</div><div class="related">${related.map(x => `<div class="rc" data-open="${x.id}"><div class="src"><span class="dot" style="background:${src(x.sourceId).color}"></span>${esc(src(x.sourceId).name)}</div><b>${esc(x.title)}</b></div>`).join('')}</div>` : ''}`;
-  const rd = $('#reader'); rd.classList.add('open'); rd.scrollTop = 0; $('#prog').style.width = '0';
+  const rd = $('#reader'); rd.classList.add('open'); if (!keep){ rd.scrollTop = 0; $('#prog').style.width = '0'; }
   document.body.style.overflow = 'hidden';
+  // artigo curto no feed → ir buscar o texto completo automaticamente (só no app instalado)
+  if (isApp && a.url && !a.full && !fullTried && a.content.length < 1500 && S.settings.autoFull !== false) loadFull(id);
 }
+let fullTried = false;
+async function loadFull(id){
+  const a = findArt(id); if (!a || !a.url) return;
+  fullTried = 'loading'; if (current === id) openReader(id, true);
+  try {
+    const html = await (await xfetch(a.url)).text();
+    const r = extractArticle(html, a.url);
+    if (r.text.length > Math.max(400, a.content.length)){ a.content = r.text; a.full = true; if (!a.image && r.image) a.image = r.image; save(); if (current === id) toast('✓ Artigo completo carregado'); }
+    else if (current === id) toast('Não encontrei mais texto neste site.');
+  } catch(e){ if (current === id) toast(isApp ? 'Não consegui abrir o site do artigo.' : 'No protótipo a internet está bloqueada.'); }
+  fullTried = true; if (current === id) openReader(id, true);
+}
+// "Readability" simples: encontra o bloco com mais parágrafos e devolve o texto limpo
+function extractArticle(html, base){
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const image = doc.querySelector('meta[property="og:image"]')?.content || '';
+  doc.querySelectorAll('script,style,noscript,nav,header,footer,aside,form,iframe,svg,button,.share,.social,.related,.newsletter,.comments,[class*="advert"],[class*="banner"],[id*="comment"]').forEach(n => n.remove());
+  let best = doc.querySelector('article'), bestScore = 0;
+  const score = el => [...el.querySelectorAll(':scope > p, :scope > div > p, :scope > section > p')].reduce((s, p) => s + Math.min(p.textContent.trim().length, 600), 0);
+  if (best) bestScore = score(best) * 1.3;
+  doc.querySelectorAll('main, article, section, div').forEach(el => { const s = score(el); if (s > bestScore){ bestScore = s; best = el; } });
+  if (!best) return { text: '', image };
+  const seen = new Set(), out = [];
+  best.querySelectorAll('p, h2, h3, blockquote, li').forEach(el => {
+    const t = el.textContent.replace(/\s+/g, ' ').trim();
+    const min = el.tagName === 'LI' ? 30 : el.tagName[0] === 'H' ? 8 : 45;
+    if (t.length < min || seen.has(t)) return; seen.add(t);
+    if (el.tagName === 'LI' && el.closest('nav, ul.menu')) return;
+    out.push(t);
+  });
+  return { text: out.join('\n\n'), image };
+}
+// artigo anterior/seguinte na lista que estavas a ver
+let readingList = [];
+function neighbour(id, dir){ const i = readingList.indexOf(id); if (i < 0) return null; return findArt(readingList[i + dir]) || null; }
+function goNeighbour(dir){
+  const nx = neighbour(current, dir); if (!nx) { toast(dir > 0 ? 'É o último artigo da lista' : 'É o primeiro artigo da lista'); return; }
+  const w = $('#rwrap'); w.style.transition = 'transform .18s, opacity .18s'; w.style.transform = `translateX(${dir > 0 ? -40 : 40}px)`; w.style.opacity = '0';
+  setTimeout(() => { stopSpeak(); openReader(nx.id); w.style.transition = 'none'; w.style.transform = `translateX(${dir > 0 ? 40 : -40}px)`; requestAnimationFrame(() => { w.style.transition = 'transform .2s, opacity .2s'; w.style.transform = ''; w.style.opacity = '1'; }); }, 170);
+}
+(() => { let x0, y0, t0; const r = document.getElementById('reader');
+  r.addEventListener('touchstart', e => { if (window.getSelection()?.toString()) return; x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; t0 = Date.now(); }, { passive: true });
+  r.addEventListener('touchend', e => { if (x0 == null) return; const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0; x0 = null;
+    if (Math.abs(dx) > 90 && Math.abs(dy) < 60 && Date.now() - t0 < 600 && !window.getSelection()?.toString()) goNeighbour(dx < 0 ? 1 : -1); }, { passive: true });
+})();
 function closeReader(){ $('#reader').classList.remove('open'); if (!chan) document.body.style.overflow = ''; stopSpeak(); current = null; $('#hlBtn').classList.remove('show'); render(); if (chan) renderChan(); }
 $('#reader').addEventListener('scroll', e => { const el = e.target; $('#prog').style.width = (el.scrollTop / Math.max(1, el.scrollHeight - el.clientHeight) * 100) + '%'; });
 
@@ -1206,7 +1328,7 @@ function speak(){
     if (speaking){ stopSpeak(); return; }
     const a = findArt(current); if (!a || !window.speechSynthesis) throw 0;
     const u = new SpeechSynthesisUtterance(a.title + '. ' + a.content.replace(/\n+/g, ' '));
-    u.lang = 'pt-PT'; u.rate = 1; u.onend = stopSpeak;
+    u.lang = S.settings.voice || 'pt-PT'; u.rate = S.settings.rate || 1; u.onend = stopSpeak;
     speechSynthesis.speak(u); speaking = true; $('#speakBtn').style.color = 'var(--accent)'; toast('A ler em voz alta… toca outra vez para parar');
   } catch(e){ toast('A leitura em voz alta não está disponível aqui.'); }
 }
@@ -1252,6 +1374,12 @@ function settingsSheet(){
       <div class="opts"><button data-theme-set="" class="${th === '' ? 'on' : ''}">☀︎ Claro</button><button data-theme-set="sepia" class="${th === 'sepia' ? 'on' : ''}">📜 Sépia</button><button data-theme-set="dark" class="${th === 'dark' ? 'on' : ''}">☾ Escuro</button></div>
       <b>Tamanho do texto no leitor</b>
       <div class="opts">${[17, 19, 21, 23].map(n => `<button data-size="${n}" class="${S.settings.size === n ? 'on' : ''}" style="font-size:${n - 4}px">Aa</button>`).join('')}</div>
+      <b>Leitura em voz alta</b>
+      <div class="opts">${[0.75, 1, 1.25, 1.5, 2].map(n => `<button data-rate="${n}" class="${(S.settings.rate || 1) === n ? 'on' : ''}">${String(n).replace('.', ',')}×</button>`).join('')}</div>
+      <div class="opts"><button data-voice="pt-PT" class="${(S.settings.voice || 'pt-PT') === 'pt-PT' ? 'on' : ''}">🇵🇹 Voz de Portugal</button><button data-voice="pt-BR" class="${S.settings.voice === 'pt-BR' ? 'on' : ''}">🇧🇷 Voz do Brasil</button></div>
+      <b>Leitura</b>
+      <div class="opts"><button data-toggle="dedupe" class="${S.settings.dedupe !== false ? 'on' : ''}">🔁 Juntar notícias repetidas</button></div>
+      <div class="opts"><button data-toggle="autoFull" class="${S.settings.autoFull !== false ? 'on' : ''}">📄 Carregar artigo completo sozinho</button></div>
       <b>Feeds</b>
       <button class="btn soft block" id="exportOpml">Exportar feeds (OPML)</button>
       <b>Dados</b>
@@ -1295,7 +1423,7 @@ function addSource(url, name, color, cc, lang){
 /* ================= Eventos ================= */
 document.addEventListener('click', e => {
   if (e.target.id === 'modal'){ closeSheet(); return; }
-  const t = e.target.closest('[data-tab],[data-f],[data-mode],[data-lib],[data-open],[data-save],[data-md],[data-close-reader],[data-delsrc],[data-delint],[data-prio],[data-unmute],[data-delhl],[data-addfeed],[data-addcat],[data-fsub],[data-chan],[data-outlet],[data-chanclose],[data-chanrefresh],[data-chanfollow],[data-chanmode],[data-theme-tab],[data-gotheme],[data-dcat],[data-websearch],[data-webfollow],[data-region],[data-dlang],[data-gemtoggle],[data-follow],[data-followcc],[data-gnews],[data-tc],[data-tsug],[data-country],[data-theme-set],[data-size],button');
+  const t = e.target.closest('[data-tab],[data-f],[data-mode],[data-lib],[data-open],[data-save],[data-md],[data-close-reader],[data-delsrc],[data-delint],[data-prio],[data-unmute],[data-delhl],[data-addfeed],[data-addcat],[data-fsub],[data-full],[data-rate],[data-voice],[data-toggle],[data-chan],[data-outlet],[data-chanclose],[data-chanrefresh],[data-chanfollow],[data-chanmode],[data-theme-tab],[data-gotheme],[data-dcat],[data-websearch],[data-webfollow],[data-region],[data-dlang],[data-gemtoggle],[data-follow],[data-followcc],[data-gnews],[data-tc],[data-tsug],[data-country],[data-theme-set],[data-size],button');
   if (!t) return;
   const d = t.dataset;
   if (d.chan){ e.stopPropagation(); if (current) closeReader(); openChannel(d.chan); return; }
@@ -1306,7 +1434,7 @@ document.addEventListener('click', e => {
   if (d.chanmode){ chanMode = d.chanmode; renderChan(); return; }
   if (d.save && !S.articles.some(a => a.id === d.save)){ const a = pool.find(x => x.id === d.save); if (a){ S.articles.push(a); if (!S.sources.some(s => s.id === a.sourceId)){ S.ghosts = S.ghosts || []; if (!S.ghosts.some(s => s.id === a.sourceId)) S.ghosts.push(chan.src); } } }
   if (d.save){ e.stopPropagation(); S.saved[d.save] ? delete S.saved[d.save] : S.saved[d.save] = Date.now(); save(); toast(S.saved[d.save] ? '🔖 Guardado na Biblioteca' : 'Removido dos guardados'); if (current) { const top = $('#reader').scrollTop; openReader(current); $('#reader').scrollTop = top; } else { render(); if (chan) renderChan(); } return; }
-  if (d.open){ openReader(d.open); return; }
+  if (d.open){ if (swiped) return; openReader(d.open); return; }
   if (d.tab){ tab = d.tab; query = ''; $('#q').value = ''; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
   if (d.f){ filter = d.f; render(); return; }
   if (d.mode){ mode = d.mode; render(); return; }
@@ -1321,6 +1449,10 @@ document.addEventListener('click', e => {
   if (d.addfeed){ addSource(d.addfeed, d.name, d.color); return; }
   if (d.themeTab){ S.settings.cat = d.themeTab; save(); render(); const el = document.querySelector('.themes .on'); el && el.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); return; }
   if (d.gotheme){ tab = 'fontes'; fsub = 'descobrir'; dCat = d.gotheme === 'geral' ? 'geral' : d.gotheme; render(); window.scrollTo(0, 0); return; }
+  if (d.full){ loadFull(d.full); return; }
+  if (d.rate){ S.settings.rate = +d.rate; save(); settingsSheet(); if (speaking){ stopSpeak(); speak(); } return; }
+  if (d.voice){ S.settings.voice = d.voice; save(); settingsSheet(); return; }
+  if (d.toggle){ S.settings[d.toggle] = S.settings[d.toggle] === false; save(); settingsSheet(); render(); return; }
   if (d.fsub){ fsub = d.fsub; render(); return; }
   if (d.dcat){ dCat = d.dcat; keepScroll(render); return; }
   if ('websearch' in d){ webSearch(dQuery.trim()); return; }
@@ -1354,7 +1486,7 @@ document.addEventListener('click', e => {
     case 'copyHl': copy('# Destaques\n\n' + S.highlights.map(h => { const a = S.articles.find(x => x.id === h.articleId); return `> ${h.text}\n\n— ${a ? `*${a.title}* (${src(a.sourceId).name})` : ''}`; }).join('\n\n')); break;
     case 'exportOpml': copy(opml()); break;
     case 'markAll': S.articles.forEach(a => S.read[a.id] ||= Date.now()); save(); closeSheet(); render(); toast('Tudo marcado como lido'); break;
-    case 'resetBtn': S = demo(); cache.clear(); save(); applySettings(); closeSheet(); tab = 'hoje'; filter = 'all'; render(); toast('Dados de exemplo repostos'); break;
+    case 'resetBtn': S = isApp ? starter() : demo(); cache.clear(); save(); applySettings(); closeSheet(); tab = 'hoje'; filter = 'all'; render(); toast('Dados de exemplo repostos'); break;
   }
 });
 document.addEventListener('change', async e => {
