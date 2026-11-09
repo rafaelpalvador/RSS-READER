@@ -2,7 +2,7 @@
 <html lang="pt-PT">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Leitura</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
@@ -319,6 +319,20 @@ nav button svg{width:19px;height:19px}
 .rbar{padding:8px 14px}
 .hero{min-height:290px}
 .hero h3{font-size:26px;margin-top:60px}
+
+/* v7 — áreas seguras (barra de estado / gestos do Android) */
+:root{--st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px)}
+html.android{--st:max(env(safe-area-inset-top,0px),40px);--sb:max(env(safe-area-inset-bottom,0px),16px)}
+header{padding-top:calc(12px + var(--st))}
+nav{bottom:calc(8px + var(--sb))}
+.app{padding-bottom:calc(84px + var(--sb))}
+.toast{top:calc(10px + var(--st))}
+.reader{padding-top:var(--st)}
+.reader::before{content:"";position:fixed;top:0;left:0;right:0;height:var(--st);background:var(--bg);z-index:4}
+.rwrap{padding-bottom:calc(120px + var(--sb))}
+.sheet{padding-bottom:calc(28px + var(--sb))}
+.hlbtn{bottom:calc(24px + var(--sb))}
+.toast{padding:9px 14px;font-size:13px;border-radius:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 </style>
 </head>
 <body>
@@ -1240,6 +1254,7 @@ function greet(){
 // esconder a barra de baixo ao descer, mostrar ao subir
 (() => { let last = 0; window.addEventListener('scroll', () => { const y = window.scrollY, n = document.getElementById('nav');
   if (y > last + 8 && y > 120) n.classList.add('hide'); else if (y < last - 8 || y < 120) n.classList.remove('hide'); last = y; }, { passive: true }); })();
+if (window.__TAURI__ && /Android/i.test(navigator.userAgent)) document.documentElement.classList.add('android');
 load(); applySettings(); greet(); render();
 if (isApp){
   document.body.classList.add('is-app');
