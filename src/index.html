@@ -333,6 +333,15 @@ nav{bottom:calc(8px + var(--sb))}
 .sheet{padding-bottom:calc(28px + var(--sb))}
 .hlbtn{bottom:calc(24px + var(--sb))}
 .toast{padding:9px 14px;font-size:13px;border-radius:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* v8 — separadores de temas */
+body::before{content:"";position:fixed;top:0;left:0;right:0;height:var(--st);background:var(--bg);z-index:9}
+.themes{position:sticky;top:var(--st);z-index:6;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin:6px -16px 4px;padding:6px 16px 8px;background:var(--bg);border-bottom:1px solid var(--line)}
+.themes::-webkit-scrollbar{display:none}
+.themes button{flex:none;display:flex;align-items:center;gap:6px;padding:8px 13px;border-radius:12px;font-size:13.5px;font-weight:700;color:var(--muted);transition:all .2s}
+.themes button span{font-size:15px;filter:grayscale(1);opacity:.7;transition:all .2s}
+.themes button.on{background:var(--card);color:var(--ink);box-shadow:var(--shadow)}
+.themes button.on span{filter:none;opacity:1}
 </style>
 </head>
 <body>
@@ -616,7 +625,7 @@ function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){
 /* ================= Texto ================= */
 const STOP = new Set('para como com sem que uma umas uns por pelo pela pelos pelas mais menos dos das nos nas aos sobre entre quando onde quem qual quais isto isso este esta esse essa muito muita melhor melhores novas novos nova novo dicas coisas fazer ter ser está são foi tem criar porque depois antes ainda também mesmo cada todo toda todos todas seus suas pode podem entre desde'.split(' '));
 const norm = s => (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-const stem = w => w.length < 5 ? w : w.replace(/coes$/, 'cao').replace(/oes$/, 'ao').replace(/s$/, '');
+const stem = w => w.length < 5 ? w : w.replace(/coes$/, 'cao').replace(/oes$/, 'ao').replace(/eis$/, 'el').replace(/ais$/, 'al').replace(/s$/, '');
 const words = t => norm(t).split(/[^a-z0-9]+/).filter(Boolean);
 const keywords = t => [...new Set(words(t).filter(w => w.length > 3 && !STOP.has(w)).map(stem))];
 const hits = (t, kws) => { const ws = words(t).map(stem); return kws.filter(k => ws.some(w => w.startsWith(k))); };
@@ -853,7 +862,7 @@ function followingView(){
 }
 function followOutlet(o, quiet){
   if (followed(o.url)) return false;
-  S.sources.push({ id: uid(), name: o.name, url: o.url, cc: o.cc, lang: o.lang, color: TYPE_COLOR[o.type] === '#16141b' ? PALETTE[S.sources.length % PALETTE.length] : TYPE_COLOR[o.type] });
+  S.sources.push({ id: uid(), name: o.name, url: o.url, cc: o.cc, lang: o.lang, cats: o.cats, color: TYPE_COLOR[o.type] === '#16141b' ? PALETTE[S.sources.length % PALETTE.length] : TYPE_COLOR[o.type] });
   if (!quiet) toast(`${flag(o.cc)} A seguir ${o.name}`);
   return true;
 }
@@ -924,14 +933,48 @@ async function followWeb(i){
   x.url = url; addSource(url, x.title); refreshDisc();
 }
 
+
+/* ================= Temas (secções) ================= */
+const THEMES = [['all', 'Tudo', '✦'], ['politica', 'Política', '🏛️'], ['economia', 'Economia', '📈'], ['financas', 'Finanças', '💰'], ['esportes', 'Esportes', '⚽'], ['tecnologia', 'Tecnologia', '💻'], ['geral', 'Geral', '📰']];
+const THEME_KW = {
+  politica: 'governo presidente presidencia eleicao eleicoes eleitoral ministro ministra ministerio parlamento congresso senado senador deputado deputada partido camara assembleia primeiro-ministro politica politico votacao stf supremo lula bolsonaro montenegro oposicao coligacao legislativas autarquicas referendo diplomacia sancoes nato otan gobierno elecciones election government minister parliament senate congress',
+  economia: 'economia economico inflacao pib desemprego emprego salario salarios imposto impostos orcamento exportacoes importacoes recessao crescimento industria comercio empresas empresa fiscal tarifas tarifa consumo precos produtividade economy inflation gdp unemployment economia',
+  financas: 'bolsa acoes investimento investimentos investidor investidores mercado mercados financeiro financeira dolar cambio ibovespa psi bitcoin cripto criptomoeda fundos dividendos tesouro poupanca selic juro juros euribor credito banco bancos nasdaq wall street stocks markets investors shares',
+  esportes: 'futebol golo gol golos gols campeonato liga jogador jogadores treinador tecnico clube selecao champions copa mundial taca benfica sporting porto flamengo palmeiras corinthians santos gremio vasco botafogo fluminense brasileirao formula tenis nba basquete voleibol olimpicos atleta vitoria derrota empate partida estadio football soccer match league',
+  tecnologia: 'tecnologia tecnologico app apps aplicativo aplicacao software hardware linux android iphone ios smartphone celular telemovel google apple microsoft samsung xiaomi honor huawei inteligencia artificial chatgpt chip processador internet computador portatil notebook windows kde gnome fedora ubuntu startup ciberseguranca hacker rede redes digital gadget consola playstation xbox nintendo videojogos tech dados dashboard dobravel ecra'
+};
+const THEME_STEMS = Object.fromEntries(Object.entries(THEME_KW).map(([k, v]) => [k, [...new Set(v.split(' '))].map(stem)]));
+function srcCats(s){ return s.cats || OUTLETS.find(o => o.url === s.url)?.cats || []; }
+const themeCache = new Map();
+function themeOf(a){
+  if (themeCache.has(a.id)) return themeCache.get(a.id);
+  const sc = srcCats(src(a.sourceId));
+  let t;
+  if (sc.length === 1 && sc[0] !== 'geral') t = sc[0];            // site especializado (ex.: InfoMoney → Finanças)
+  else {
+    const tw = words(a.title).map(stem), cw = words(a.content.slice(0, 1500)).map(stem);
+    let best = null, bv = 0;
+    for (const [k, kws] of Object.entries(THEME_STEMS)){
+      const set = new Set(kws);
+      const v = tw.filter(w => set.has(w)).length * 3 + cw.filter(w => set.has(w)).length;
+      const bonus = sc.includes(k) ? 1 : 0;
+      if (v + bonus > bv){ bv = v + bonus; best = k; }
+    }
+    t = bv >= 3 ? best : (sc.find(c => c !== 'geral') && bv >= 1 ? sc.find(c => c !== 'geral') : 'geral');
+  }
+  themeCache.set(a.id, t); return t;
+}
+
 /* ================= Vistas ================= */
 let tab = 'hoje', filter = 'all', mode = 'parati', libMode = 'guardados', query = '';
 
 const views = {
   hoje(){
+    const theme = S.settings.cat || 'all';
     let list = S.articles.filter(a => !isMuted(a)).map(a => ({ a, r: analyse(a) }));
     if (query){ const q = norm(query); list = list.filter(x => norm(x.a.title + ' ' + x.a.content).includes(q)); }
-    const top = [...list].filter(x => !S.read[x.a.id]).sort((x, y) => y.r.score - x.r.score || y.a.date - x.a.date);
+    const top = [...list].filter(x => !S.read[x.a.id] && (theme === 'all' || themeOf(x.a) === theme)).sort((x, y) => y.r.score - x.r.score || y.a.date - x.a.date);
+    if (theme !== 'all') list = list.filter(x => themeOf(x.a) === theme);
     if (filter !== 'all') list = list.filter(x => x.r.matched.some(m => m.id === filter));
     if (country !== 'all') list = list.filter(x => src(x.a.sourceId).cc === country);
     const ccs = {}; S.articles.forEach(a => { const c = src(a.sourceId).cc; if (c) ccs[c] = (ccs[c] || 0) + 1; });
@@ -943,13 +986,15 @@ const views = {
     const picks = showTop ? top.slice(1, 6) : [];
     if (hero) list = list.filter(x => x.a.id !== hero.a.id || mode !== 'parati');
     const hs = hero && src(hero.a.sourceId);
+    const thName = THEMES.find(t => t[0] === theme);
     return `
+    <div class="themes">${THEMES.map(([k, n, i]) => `<button class="${theme === k ? 'on' : ''}" data-theme-tab="${k}"><span>${i}</span>${n}</button>`).join('')}</div>
     ${hero ? `
       <div class="hero fade" data-open="${hero.a.id}">
         <div class="bgfx" style="${grad(hs.color, 3)}"></div>
         ${hero.a.image ? `<img class="bgfx" src="${esc(hero.a.image)}" style="object-fit:cover;width:100%;height:100%" onerror="this.remove()">` : ''}
         <div class="bgfx grain"></div>
-        <div class="hero-top"><span class="tag">✦ Escolhido para ti</span><span class="tag ghost">${readMin(hero.a.content)} min</span></div>
+        <div class="hero-top"><span class="tag">✦ Escolhido para ti${theme !== 'all' ? ' · ' + thName[1] : ''}</span><span class="tag ghost">${readMin(hero.a.content)} min</span></div>
         <h3>${esc(hero.a.title)}</h3>
         <p>${esc(analyse(hero.a).summary[0] || '')}</p>
         <div class="hero-src">${hs.cc ? flag(hs.cc) : '<span class="dot" style="background:#fff"></span>'} ${esc(hs.name)} · ${ago(hero.a.date)}</div>
@@ -957,7 +1002,7 @@ const views = {
     ${picks.length ? `
       <div class="sec"><h2>Também para ti</h2></div>
       <div class="carousel">${picks.map(miniCard).join('')}</div>` : ''}
-    <div class="sec"><h2>${query ? `Resultados para “${esc(query)}”` : 'O teu feed'}</h2></div>
+    <div class="sec"><h2>${query ? `Resultados para “${esc(query)}”` : theme !== 'all' ? thName[2] + ' ' + thName[1] : 'O teu feed'}</h2></div>
     <div class="chips">
       <button class="chip ${filter === 'all' ? 'on' : ''}" data-f="all">Tudo</button>
       ${S.interests.map(i => `<button class="chip ${filter === i.id ? 'on' : ''}" data-f="${i.id}">${i.prio ? '⚡ ' : ''}${esc(short(i.text))}</button>`).join('')}
@@ -975,6 +1020,7 @@ const views = {
     ${list.length ? groupBy(list).filter(([, xs]) => xs.length).map(([t, xs]) => `
       <div class="group-h">${t}</div>
       <div class="elist">${xs.map(x => artCard(x.a)).join('')}</div>`).join('')
+      : theme !== 'all' && !query ? `<div class="empty"><div class="big">${thName[2]}</div>Ainda não há artigos de ${thName[1]}.<br>Segue jornais deste tema em <b>Feeds → Descobrir</b>.<br><br><button class="pill acc" data-gotheme="${theme}">Ver jornais de ${thName[1]}</button></div>`
       : `<div class="empty"><div class="big">☕</div>${mode === 'naolidos' ? 'Já viste tudo o que é novo.' : 'Nada por aqui. Adiciona feeds ou muda o filtro.'}</div>`}
     ${list.length ? `<div class="end"><span>❦</span><b>É tudo por agora.</b><small>Sem pressa — os artigos ficam aqui à tua espera.</small></div>` : ''}
     <button class="btn soft block" id="pasteBtn" style="margin-top:8px">＋ Colar um artigo para testar</button>`;
@@ -1165,7 +1211,7 @@ function addSource(url, name, color, cc, lang){
 /* ================= Eventos ================= */
 document.addEventListener('click', e => {
   if (e.target.id === 'modal'){ closeSheet(); return; }
-  const t = e.target.closest('[data-tab],[data-f],[data-mode],[data-lib],[data-open],[data-save],[data-md],[data-close-reader],[data-delsrc],[data-delint],[data-prio],[data-unmute],[data-delhl],[data-addfeed],[data-addcat],[data-fsub],[data-dcat],[data-websearch],[data-webfollow],[data-region],[data-dlang],[data-gemtoggle],[data-follow],[data-followcc],[data-gnews],[data-tc],[data-tsug],[data-country],[data-theme-set],[data-size],button');
+  const t = e.target.closest('[data-tab],[data-f],[data-mode],[data-lib],[data-open],[data-save],[data-md],[data-close-reader],[data-delsrc],[data-delint],[data-prio],[data-unmute],[data-delhl],[data-addfeed],[data-addcat],[data-fsub],[data-theme-tab],[data-gotheme],[data-dcat],[data-websearch],[data-webfollow],[data-region],[data-dlang],[data-gemtoggle],[data-follow],[data-followcc],[data-gnews],[data-tc],[data-tsug],[data-country],[data-theme-set],[data-size],button');
   if (!t) return;
   const d = t.dataset;
   if (d.save){ e.stopPropagation(); S.saved[d.save] ? delete S.saved[d.save] : S.saved[d.save] = Date.now(); save(); toast(S.saved[d.save] ? '🔖 Guardado na Biblioteca' : 'Removido dos guardados'); if (current) { const top = $('#reader').scrollTop; openReader(current); $('#reader').scrollTop = top; } else render(); return; }
@@ -1182,6 +1228,8 @@ document.addEventListener('click', e => {
   if (d.unmute !== undefined){ S.muted.splice(+d.unmute, 1); save(); render(); return; }
   if (d.delhl){ S.highlights = S.highlights.filter(h => h.id !== d.delhl); save(); render(); return; }
   if (d.addfeed){ addSource(d.addfeed, d.name, d.color); return; }
+  if (d.themeTab){ S.settings.cat = d.themeTab; save(); render(); const el = document.querySelector('.themes .on'); el && el.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); return; }
+  if (d.gotheme){ tab = 'fontes'; fsub = 'descobrir'; dCat = d.gotheme === 'geral' ? 'geral' : d.gotheme; render(); window.scrollTo(0, 0); return; }
   if (d.fsub){ fsub = d.fsub; render(); return; }
   if (d.dcat){ dCat = d.dcat; keepScroll(render); return; }
   if ('websearch' in d){ webSearch(dQuery.trim()); return; }
