@@ -381,6 +381,88 @@ body::before{content:"";position:fixed;top:0;left:0;right:0;height:var(--st);bac
 .erow.sw-l::before{left:100%;margin-left:4px;background:#13b38b}
 .erow.sw-go::before{opacity:1}
 .sheet .stack > b{display:block;margin-top:14px}
+
+/* v11 — Descobrir estilo diretório */
+.dsearch input{background:var(--card);border-radius:16px;padding:14px 15px 14px 44px}
+.chip.drop{background:var(--card)}
+.lg{position:relative;overflow:hidden;display:grid;place-items:center;color:#fff;font-weight:800;flex:none;border-radius:14px;width:52px;height:52px;font-size:20px}
+.lg img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff;padding:18%}
+.lg.sm{width:56px;height:56px;border-radius:12px}
+.lg.md{width:48px;height:48px;border-radius:12px}
+.lg.xs{width:40px;height:40px;border-radius:10px;font-size:15px}
+.lg.xl{width:100%;height:100%;border-radius:18px;font-size:44px;font-family:Newsreader,serif}
+.lg.xl img{padding:24%}
+.lg.art{width:118px;height:118px;border-radius:16px;font-size:48px;font-family:Newsreader,serif;box-shadow:0 10px 24px rgba(0,0,0,.35)}
+.lg.art img{padding:20%}
+.feat-wrap{margin:14px -16px 0}
+.featc{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;padding:0 16px;scrollbar-width:none}
+.featc::-webkit-scrollbar,.pager::-webkit-scrollbar,.sq-row::-webkit-scrollbar,.nets::-webkit-scrollbar,.flagrow::-webkit-scrollbar{display:none}
+.fcard{flex:none;width:100%;scroll-snap-align:center;border-radius:24px;padding:16px;display:flex;gap:14px;color:#fff;position:relative;min-height:150px;cursor:pointer}
+.fbody{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;padding-right:26px}
+.badge{align-self:flex-start;font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;background:rgba(255,255,255,.18);padding:4px 9px;border-radius:99px;margin-bottom:4px}
+.fbody b{font-size:21px;font-weight:800;line-height:1.15;letter-spacing:-.3px}
+.fbody small{opacity:.8;font-size:12.5px;font-weight:600}
+.fbody p{margin:4px 0 0;font-size:13px;opacity:.88;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.plus{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:20px;font-weight:400;color:var(--ink2);flex:none;transition:all .2s}
+.plus.done{color:var(--accent);font-size:16px;font-weight:800}
+.fcard > .plus{position:absolute;top:12px;right:12px;color:#fff;background:rgba(0,0,0,.18)}
+.dots{display:flex;justify-content:center;gap:6px;padding:12px 0 2px}
+.dots i{width:6px;height:6px;border-radius:50%;background:var(--line);transition:all .25s}
+[data-theme="dark"] .dots i{background:rgba(255,255,255,.18)}
+.dots i.on{background:var(--ink2);width:16px;border-radius:99px}
+.dsec{display:flex;align-items:flex-end;justify-content:space-between;margin:28px 0 10px;gap:10px}
+.dsec h3{margin:0;font-size:20px;font-weight:800;letter-spacing:-.3px}
+.dsec small{color:var(--muted);font-size:12.5px;font-weight:600}
+.seeall{color:var(--accent);font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:4px 0;white-space:nowrap}
+.pager{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;margin:0 -16px;padding:0 16px;scrollbar-width:none}
+.page{flex:none;width:100%;scroll-snap-align:center;display:flex;flex-direction:column}
+.prow{display:flex;align-items:center;gap:12px;padding:8px 0;cursor:pointer}
+.prow + .prow{border-top:1px solid var(--line)}
+.prow .grow{flex:1;min-width:0}
+.prow b{display:block;font-size:15.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prow small{display:block;color:var(--muted);font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nets{display:flex;gap:16px;overflow-x:auto;margin:0 -16px;padding:4px 16px 4px;scrollbar-width:none}
+.net{flex:none;width:118px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px}
+.ncirc{width:108px;height:108px;border-radius:50%;position:relative;overflow:hidden;display:grid;place-items:center;font-size:42px;font-weight:800;margin-bottom:8px;box-shadow:var(--shadow)}
+.ncirc img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:24%;background:#fff}
+.ncirc span{font-size:40px}
+.net b{font-size:13.5px;font-weight:700;line-height:1.2}
+.net small{font-size:11.5px;color:var(--muted);font-weight:600}
+.gemgrid{display:grid;grid-template-columns:1fr 1.15fr;gap:12px}
+.gembig{border-radius:20px;padding:16px;color:#fff;display:flex;flex-direction:column;justify-content:flex-end;min-height:200px;position:relative;overflow:hidden;cursor:pointer}
+.gembig .grain{position:absolute;inset:0;opacity:.25;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.gembig > *{position:relative}
+.gico{font-size:30px;margin-bottom:auto}
+.gembig b{font-family:Newsreader,serif;font-weight:500;font-size:24px;line-height:1.1;margin-top:20px}
+.gembig small{font-size:12px;opacity:.88;margin-top:6px;line-height:1.35}
+.gemside{display:flex;flex-direction:column;gap:12px}
+.gemrow{flex:1;display:flex;align-items:center;gap:10px;background:var(--card);border-radius:18px;padding:10px;box-shadow:var(--shadow);cursor:pointer;min-width:0}
+.gemrow > div:last-child{min-width:0}
+.gemrow b{display:block;font-size:14px;line-height:1.2}
+.gemrow small{display:block;color:var(--muted);font-size:12px;font-weight:600;margin-top:2px}
+.because{display:flex;align-items:center;gap:10px}
+.because small{display:block;color:var(--muted);font-size:12.5px;font-weight:600}
+.sq-row{display:flex;gap:12px;overflow-x:auto;margin:0 -16px;padding:2px 16px 4px;scrollbar-width:none;scroll-snap-type:x proximity}
+.sq{flex:none;width:136px;cursor:pointer;scroll-snap-align:start}
+.sqc{width:136px;height:136px;position:relative;margin-bottom:8px}
+.sqc .plus{position:absolute;right:6px;bottom:6px;background:rgba(0,0,0,.45);color:#fff;width:30px;height:30px;font-size:18px;backdrop-filter:blur(6px)}
+.sqc .plus.done{background:var(--accent);color:#fff;font-size:14px}
+.sq b{display:block;font-size:14px;font-weight:700;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sq small{display:block;color:var(--muted);font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.flagrow{display:flex;gap:10px;overflow-x:auto;margin:0 -16px;padding:2px 16px 4px;scrollbar-width:none}
+.fl-c{flex:none;width:76px;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11.5px;font-weight:700;color:var(--ink2);text-align:center;line-height:1.2}
+.fl-c span{width:60px;height:60px;border-radius:50%;background:var(--card);box-shadow:var(--shadow);display:grid;place-items:center;font-size:30px}
+.lhead{display:flex;align-items:center;gap:10px;margin:16px 0 4px}
+.lhead h2{margin:0;font-size:22px;font-weight:800;letter-spacing:-.3px}
+.lhead .ibtn{font-size:22px;font-weight:400}
+.orow > div[data-outlet]{cursor:pointer}
+
+/* logótipo: ícone do site num azulejo branco sobre o gradiente */
+.lg img{inset:auto;width:58%;height:58%;padding:9%;border-radius:24%;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.lg.sm img,.lg.md img,.lg.xs img{width:70%;height:70%;padding:10%}
+.lg.xl img{width:44%;height:44%;padding:8%;padding:8%}
+.lg.art img{width:50%;height:50%;padding:8%}
+.ncirc img{inset:auto;width:56%;height:56%;padding:0;background:transparent}
 </style>
 </head>
 <body>
@@ -804,7 +886,7 @@ let fsub = 'descobrir', dRegion = 'all', dLang = 'all', dGem = false, dQuery = '
 const followed = url => S.sources.some(s => s.url === url);
 function outletRow(o){
   return `<div class="orow">
-    <div class="av" data-outlet="${OUTLETS.indexOf(o)}" style="background:${TYPE_COLOR[o.type] || '#888'}">${esc(o.name[0])}</div>
+    <div data-outlet="${OUTLETS.indexOf(o)}">${logo(o, 'lg md')}</div>
     <div class="grow chl" data-outlet="${OUTLETS.indexOf(o)}">
       <b>${esc(o.name)} ${o.gem ? '<span class="gem" title="Joia escondida">💎</span>' : ''}</b>
       <p>${esc(o.desc)}</p>
@@ -815,7 +897,7 @@ function outletRow(o){
 }
 function discFiltered(){
   const q = norm(dQuery);
-  return OUTLETS.filter(o => (dRegion === 'all' || (dRegion === 'Brasil' ? o.cc === 'BR' : COUNTRIES[o.cc][1] === dRegion)) && (dLang === 'all' || o.lang === dLang) && (!dGem || o.gem) && (dCat === 'all' || o.cats.includes(dCat))
+  return OUTLETS.filter(o => (!dCc || o.cc === dCc) && (dNet === '' || NETWORKS[+dNet].ids.includes(o.name)) && (dRegion === 'all' || (dRegion === 'Brasil' ? o.cc === 'BR' : COUNTRIES[o.cc][1] === dRegion)) && (dLang === 'all' || o.lang === dLang) && (!dGem || o.gem) && (dCat === 'all' || o.cats.includes(dCat))
     && (!q || norm([o.name, o.desc, o.type, cname(o.cc), COUNTRIES[o.cc][1], LANGS[o.lang], ...o.cats.map(c => CATS[c])].join(' ')).includes(q)));
 }
 function discResults(){
@@ -834,41 +916,105 @@ function discResults(){
       ${os.length > 1 ? `<button class="followall" data-followcc="${cc}" data-ids="${os.map(o => OUTLETS.indexOf(o)).join(',')}">Seguir todos de ${cname(cc)}${dCat !== 'all' ? ' · ' + CATS[dCat] : ''}</button>` : ''}
     </div>`).join('') + (webBox ? '' : '');
 }
-function discoverView(){
-  const gems = OUTLETS.filter(o => o.gem);
-  const pick = gems.sort((a, b) => hash(a.name + dkey(Date.now())) - hash(b.name + dkey(Date.now()))).slice(0, 6);
-  const showGems = !dQuery && dRegion === 'all' && dLang === 'all' && !dGem;
+/* ---------- Descobrir v2 (inspirado nos diretórios de podcasts) ---------- */
+let dCc = '', dNet = '';
+const SITE = { 'Público': 'publico.pt', 'El Mundo': 'elmundo.es', 'Expansión': 'expansion.com', 'Marca': 'marca.com', 'Corriere della Sera': 'corriere.it',
+  "L'Équipe": 'lequipe.fr', 'Hacker News': 'news.ycombinator.com', 'NHK': 'nhk.or.jp', 'Folha de S.Paulo': 'folha.uol.com.br', 'Folha Mercado': 'folha.uol.com.br',
+  'BBC News': 'bbc.com', 'BBC World': 'bbc.com', 'BBC Sport': 'bbc.com', 'BBC News Brasil': 'bbc.com', 'Les Echos': 'lesechos.fr', 'kicker': 'kicker.de', 'Die Zeit': 'zeit.de',
+  'Estadão': 'estadao.com.br', 'Global Voices': 'globalvoices.org', 'Infobae': 'infobae.com', 'Bloomberg Markets': 'bloomberg.com', 'NPR': 'npr.org' };
+const siteOf = o => SITE[o.name] || hostOf(o.url);
+const NETWORKS = [
+  { name: 'Grupo Globo', sub: 'g1, ge e mais', site: 'globo.com', ids: ['g1', 'g1 Política', 'g1 Economia', 'ge'] },
+  { name: 'BBC', sub: 'Notícias, desporto e Brasil', site: 'bbc.com', ids: ['BBC News', 'BBC World', 'BBC Sport', 'BBC News Brasil'] },
+  { name: 'Folha & UOL', sub: 'São Paulo', site: 'uol.com.br', ids: ['Folha de S.Paulo', 'Folha Mercado', 'UOL Notícias'] },
+  { name: 'TVs e rádios públicas', sub: 'Serviço público', emoji: '📡', color: '#2f80ed', ids: OUTLETS.filter(o => o.type === 'Serviço público').map(o => o.name) },
+  { name: 'Jornalismo de investigação', sub: 'Pequenas redações', emoji: '🔎', color: '#7b5cff', ids: OUTLETS.filter(o => o.type === 'Investigação').map(o => o.name) },
+  { name: 'Unidad Editorial', sub: 'Espanha', site: 'elmundo.es', ids: ['El Mundo', 'Marca', 'Expansión'] },
+  { name: 'Deutsche Welle', sub: 'Alemanha para o mundo', site: 'dw.com', ids: ['DW', 'DW Português'] },
+  { name: 'Independentes PT', sub: 'Sem publicidade', emoji: '🌱', color: '#13b38b', ids: ['Fumaça', 'Setenta e Quatro', 'Mensagem de Lisboa', 'Shifter', 'Polígrafo'] }
+];
+const oi = o => OUTLETS.indexOf(o);
+function logo(o, cls = 'lg'){
+  const site = siteOf(o), c = TYPE_COLOR[o.type] === '#16141b' ? PALETTE[hash(o.name) % PALETTE.length] : TYPE_COLOR[o.type];
+  return `<div class="${cls}" style="${grad(c, hash(o.name))}"><span>${esc(o.name[0])}</span>${site ? `<img src="https://www.google.com/s2/favicons?domain=${esc(site)}&sz=128" alt="" onerror="this.remove()">` : ''}</div>`;
+}
+const plus = o => followed(o.url) ? `<button class="plus done" data-follow="${oi(o)}" title="A seguir">✓</button>` : `<button class="plus" data-follow="${oi(o)}" title="Seguir">＋</button>`;
+const secHead = (t, action, sub) => `<div class="dsec"><div><h3>${t}</h3>${sub ? `<small>${sub}</small>` : ''}</div>${action ? `<button class="seeall" ${action}>Ver tudo</button>` : ''}</div>`;
+function pager(id, list, per = 4){
+  const pages = []; for (let i = 0; i < list.length; i += per) pages.push(list.slice(i, i + per));
+  return `<div class="pager" data-dots="${id}">${pages.map(p => `<div class="page">${p.map(o => `
+      <div class="prow" data-outlet="${oi(o)}">${logo(o, 'lg sm')}<div class="grow"><b>${esc(o.name)}${o.gem ? ' 💎' : ''}</b><small>${flag(o.cc)} ${o.cats.filter(c => c !== 'geral').map(c => CATS[c]).join(' · ') || o.type}</small></div>${plus(o)}</div>`).join('')}</div>`).join('')}</div>
+    ${pages.length > 1 ? `<div class="dots" id="${id}">${pages.map((_, i) => `<i class="${i ? '' : 'on'}"></i>`).join('')}</div>` : ''}`;
+}
+const squares = list => `<div class="sq-row">${list.map(o => `
+  <div class="sq" data-outlet="${oi(o)}"><div class="sqc">${logo(o, 'lg xl')}${plus(o)}</div><b>${esc(o.name)}</b><small>${flag(o.cc)} ${esc(cname(o.cc))}</small></div>`).join('')}</div>`;
+const daySeed = s => hash(s + dkey(Date.now()));
+const shuffleDay = (arr, k) => [...arr].sort((a, b) => daySeed(k + a.name) - daySeed(k + b.name));
+function discoverHome(){
+  const unf = OUTLETS.filter(o => !followed(o.url));
+  const feat = shuffleDay(OUTLETS.filter(o => o.gem || ['g1', 'Público', 'The Guardian', 'Le Monde', 'El País', 'Folha de S.Paulo', 'Tecnoblog', 'Der Spiegel'].includes(o.name)), 'f').slice(0, 7);
+  const br = OUTLETS.filter(o => o.cc === 'BR'), eu = OUTLETS.filter(o => COUNTRIES[o.cc][1] === 'Europa');
+  const gems = shuffleDay(OUTLETS.filter(o => o.gem), 'g');
+  // "Porque segues X": jornais parecidos com um dos que já segues
+  const mine = S.sources.map(s => OUTLETS.find(o => o.url === s.url)).filter(Boolean);
+  const base = mine.length ? shuffleDay(mine, 'b')[0] : null;
+  const recs = base ? unf.map(o => ({ o, v: o.cats.filter(c => base.cats.includes(c) && c !== 'geral').length * 2 + (o.cc === base.cc ? 1.5 : 0) + (o.lang === base.lang ? 1 : 0) + (o.gem ? .5 : 0) }))
+    .filter(x => x.v >= 2).sort((a, b) => b.v - a.v).slice(0, 10).map(x => x.o) : [];
+  const ccs = [...new Set(OUTLETS.map(o => o.cc))];
   return `
-    <div class="search open" style="display:block"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="dq" value="${esc(dQuery)}" placeholder="Pesquisar jornal, país, tema ou site…"></div>
-    <div class="chips">
-      <button class="chip ${dRegion === 'all' ? 'on' : ''}" data-region="all">🌍 Mundo</button>
-      ${REGIONS.map(r => `<button class="chip ${dRegion === r ? 'on' : ''}" data-region="${r}">${r}</button>`).join('')}
+    <div class="feat-wrap"><div class="featc" data-dots="fdots">${feat.map(o => `
+      <div class="fcard" data-outlet="${oi(o)}" style="${grad(TYPE_COLOR[o.type] === '#16141b' ? '#3a3550' : TYPE_COLOR[o.type], hash(o.name))}">
+        ${logo(o, 'lg art')}
+        <div class="fbody"><span class="badge">${o.gem ? '💎 Joia escondida' : '✦ Em destaque'}</span><b>${esc(o.name)}</b><small>${flag(o.cc)} ${esc(cname(o.cc))} · ${o.type}</small><p>${esc(o.desc)}</p></div>
+        ${plus(o)}
+      </div>`).join('')}</div>
+      <div class="dots" id="fdots">${feat.map((_, i) => `<i class="${i ? '' : 'on'}"></i>`).join('')}</div></div>
+
+    ${secHead('🇧🇷 Em alta no Brasil', 'data-region="Brasil"')}
+    ${pager('pbr', br.slice(0, 16))}
+
+    ${secHead('🇪🇺 Em alta na Europa', 'data-region="Europa"')}
+    ${pager('peu', shuffleDay(eu.filter(o => o.cats.includes('geral') || o.cats.includes('politica')), 'eu').slice(0, 16))}
+
+    ${secHead('Grupos de media', '')}
+    <div class="nets">${NETWORKS.map((n, i) => `<button class="net" data-net="${i}">
+      <div class="ncirc" style="${n.emoji ? grad(n.color, i) : 'background:#fff'}">${n.emoji ? `<span>${n.emoji}</span>` : `<span style="color:#16141b">${esc(n.name[0])}</span><img src="https://www.google.com/s2/favicons?domain=${n.site}&sz=128" alt="" onerror="this.remove()">`}</div>
+      <b>${esc(n.name)}</b><small>${esc(n.sub)}</small></button>`).join('')}</div>
+
+    ${secHead('💎 Joias escondidas', 'data-gemtoggle', 'Bons e pouco conhecidos')}
+    <div class="gemgrid">
+      <div class="gembig" data-outlet="${oi(gems[0])}" style="${grad('#7b5cff', 4)}"><div class="grain"></div><span class="gico">💎</span><b>${esc(gems[0].name)}</b><small>${flag(gems[0].cc)} ${esc(gems[0].desc)}</small></div>
+      <div class="gemside">${gems.slice(1, 3).map(o => `<div class="gemrow" data-outlet="${oi(o)}">${logo(o, 'lg md')}<div><b>${esc(o.name)}</b><small>${flag(o.cc)} ${esc(cname(o.cc))}</small></div></div>`).join('')}</div>
     </div>
-    <div class="chips" style="padding-top:0">
-      <button class="chip ${dCat === 'all' ? 'on' : ''}" data-dcat="all">Todos os temas</button>
-      ${Object.entries(CATS).map(([k, v]) => `<button class="chip ${dCat === k ? 'on' : ''}" data-dcat="${k}">${v}</button>`).join('')}
+
+    ${recs.length ? `<div class="dsec"><div class="because">${logo(base, 'lg xs')}<div><small>Porque segues</small><h3>${esc(base.name)}</h3></div></div></div>${squares(recs)}` : ''}
+
+    ${secHead('Por país', '')}
+    <div class="flagrow">${ccs.map(cc => `<button class="fl-c" data-dcc="${cc}"><span>${flag(cc)}</span>${esc(cname(cc))}</button>`).join('')}</div>
+
+    ${['tecnologia', 'financas', 'economia', 'politica', 'esportes'].map(c => `
+      ${secHead({ tecnologia: '💻 Tecnologia', financas: '💰 Finanças', economia: '📈 Economia', politica: '🏛️ Política', esportes: '⚽ Esportes' }[c], `data-dcat="${c}"`)}
+      ${squares(shuffleDay(OUTLETS.filter(o => o.cats.includes(c)), c).slice(0, 10))}`).join('')}
+
+    <div class="note proto" style="margin-top:24px"><span>ℹ️</span><span>Os logótipos e os links dos feeds carregam no app instalado.</span></div>`;
+}
+function discoverView(){
+  const listMode = dQuery || dRegion !== 'all' || dLang !== 'all' || dGem || dCat !== 'all' || dCc || dNet !== '';
+  const title = dNet !== '' ? NETWORKS[+dNet].name : dCc ? `${flag(dCc)} ${cname(dCc)}` : dGem ? '💎 Joias escondidas' : dRegion !== 'all' ? dRegion : dCat !== 'all' ? CATS[dCat] : dQuery ? 'Pesquisa' : 'Jornais';
+  return `
+    <div class="search open dsearch" style="display:block"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="dq" value="${esc(dQuery)}" placeholder="Pesquisar jornais ou colar um link RSS"></div>
+    <div class="chips" style="padding-top:6px">
+      <button class="chip drop ${dRegion !== 'all' ? 'on' : ''}" data-regionsheet>${dRegion === 'all' ? '🌍 Todas as regiões' : dRegion} ▾</button>
+      ${Object.entries(CATS).filter(([k]) => k !== 'geral').map(([k, v]) => `<button class="chip ${dCat === k ? 'on' : ''}" data-dcat="${dCat === k ? 'all' : k}">${v}</button>`).join('')}
+      <button class="chip ${dGem ? 'on' : ''}" data-gemtoggle>💎 Joias</button>
     </div>
-    <div class="chips" style="padding-top:0">
-      <button class="chip ${dGem ? 'on' : ''}" data-gemtoggle>💎 Joias escondidas</button>
-      <button class="chip ${dLang === 'all' ? 'on' : ''}" data-dlang="all">Todas as línguas</button>
-      ${Object.entries(LANGS).map(([k, v]) => `<button class="chip ${dLang === k ? 'on' : ''}" data-dlang="${k}">${v}</button>`).join('')}
-    </div>
-    ${showGems ? `
-      <div class="feat">
-        <button class="ftbig br" data-region="Brasil"><span>🇧🇷</span><b>Brasil</b><small>${OUTLETS.filter(o => o.cc === 'BR').length} jornais · política, economia, finanças, esportes, tecnologia</small></button>
-        <button class="ftbig eu" data-region="Europa"><span>🇪🇺</span><b>Europa</b><small>${OUTLETS.filter(o => COUNTRIES[o.cc][1] === 'Europa').length} jornais de ${new Set(OUTLETS.filter(o => COUNTRIES[o.cc][1] === 'Europa').map(o => o.cc)).size} países</small></button>
+    ${listMode ? `
+      <div class="lhead"><button class="ibtn" data-dhome>‹</button><h2>${esc(title)}</h2></div>
+      <div class="chips" style="padding-top:0">
+        <button class="chip ${dLang === 'all' ? 'on' : ''}" data-dlang="all">Todas as línguas</button>
+        ${Object.entries(LANGS).map(([k, v]) => `<button class="chip ${dLang === k ? 'on' : ''}" data-dlang="${k}">${v}</button>`).join('')}
       </div>
-      <div class="sec"><h2>💎 Joias escondidas</h2><span>bons e pouco conhecidos</span></div>
-      <div class="carousel">${pick.map(o => `
-        <div class="gcard" style="${grad(TYPE_COLOR[o.type] === '#16141b' ? '#555' : TYPE_COLOR[o.type], hash(o.name))}">
-          <div class="gtop"><span class="gflag">${flag(o.cc)}</span><span class="gtype">${o.type}</span></div>
-          <b>${esc(o.name)}</b><p>${esc(o.desc)}</p>
-          ${followed(o.url) ? '<span class="gbtn done">✓ A seguir</span>' : `<button class="gbtn" data-follow="${OUTLETS.indexOf(o)}">Seguir</button>`}
-        </div>`).join('')}</div>
-      <div class="sec"><h2>Jornais por país</h2><span>${OUTLETS.length} sugestões</span></div>` : '<div style="height:10px"></div>'}
-    ${!showGems && !dQuery ? '' : ''}
-    <div id="discRes">${discResults()}</div>
-    <div class="note proto"><span>ℹ️</span><span>Os links destes feeds foram escritos à mão e vão ser confirmados quando passarmos o app para o telemóvel.</span></div>`;
+      <div id="discRes">${discResults()}</div>` : discoverHome()}`;
 }
 function topicView(){
   const ccs = Object.keys(GNEWS);
@@ -1423,7 +1569,7 @@ function addSource(url, name, color, cc, lang){
 /* ================= Eventos ================= */
 document.addEventListener('click', e => {
   if (e.target.id === 'modal'){ closeSheet(); return; }
-  const t = e.target.closest('[data-tab],[data-f],[data-mode],[data-lib],[data-open],[data-save],[data-md],[data-close-reader],[data-delsrc],[data-delint],[data-prio],[data-unmute],[data-delhl],[data-addfeed],[data-addcat],[data-fsub],[data-full],[data-rate],[data-voice],[data-toggle],[data-chan],[data-outlet],[data-chanclose],[data-chanrefresh],[data-chanfollow],[data-chanmode],[data-theme-tab],[data-gotheme],[data-dcat],[data-websearch],[data-webfollow],[data-region],[data-dlang],[data-gemtoggle],[data-follow],[data-followcc],[data-gnews],[data-tc],[data-tsug],[data-country],[data-theme-set],[data-size],button');
+  const t = e.target.closest('[data-tab],[data-f],[data-mode],[data-lib],[data-open],[data-save],[data-md],[data-close-reader],[data-delsrc],[data-delint],[data-prio],[data-unmute],[data-delhl],[data-addfeed],[data-addcat],[data-fsub],[data-net],[data-dcc],[data-dhome],[data-regionsheet],[data-pickregion],[data-full],[data-rate],[data-voice],[data-toggle],[data-chan],[data-outlet],[data-chanclose],[data-chanrefresh],[data-chanfollow],[data-chanmode],[data-theme-tab],[data-gotheme],[data-dcat],[data-websearch],[data-webfollow],[data-region],[data-dlang],[data-gemtoggle],[data-follow],[data-followcc],[data-gnews],[data-tc],[data-tsug],[data-country],[data-theme-set],[data-size],button');
   if (!t) return;
   const d = t.dataset;
   if (d.chan){ e.stopPropagation(); if (current) closeReader(); openChannel(d.chan); return; }
@@ -1453,15 +1599,23 @@ document.addEventListener('click', e => {
   if (d.rate){ S.settings.rate = +d.rate; save(); settingsSheet(); if (speaking){ stopSpeak(); speak(); } return; }
   if (d.voice){ S.settings.voice = d.voice; save(); settingsSheet(); return; }
   if (d.toggle){ S.settings[d.toggle] = S.settings[d.toggle] === false; save(); settingsSheet(); render(); return; }
+  if (d.net !== undefined){ dNet = d.net; render(); window.scrollTo(0, 0); return; }
+  if (d.dcc){ dCc = d.dcc; render(); window.scrollTo(0, 0); return; }
+  if ('dhome' in d){ dQuery = ''; dRegion = 'all'; dLang = 'all'; dGem = false; dCat = 'all'; dCc = ''; dNet = ''; render(); window.scrollTo(0, 0); return; }
+  if ('regionsheet' in d){ sheet(`<h2>Regiões</h2><div class="stack" style="margin-top:12px">${['all', ...REGIONS].map(r => `<button class="btn ${dRegion === r ? 'acc' : 'soft'} block" data-pickregion="${r}">${r === 'all' ? '🌍 Todas as regiões' : r}</button>`).join('')}</div>`); return; }
+  if (d.pickregion){ dRegion = d.pickregion; closeSheet(); render(); window.scrollTo(0, 0); return; }
   if (d.fsub){ fsub = d.fsub; render(); return; }
-  if (d.dcat){ dCat = d.dcat; keepScroll(render); return; }
+  if (d.dcat){ dCat = d.dcat; render(); window.scrollTo(0, 0); return; }
   if ('websearch' in d){ webSearch(dQuery.trim()); return; }
   if (d.webfollow !== undefined){ followWeb(+d.webfollow); return; }
-  if (d.region){ dRegion = d.region; keepScroll(render); return; }
+  if (d.region){ dRegion = d.region; render(); window.scrollTo(0, 0); return; }
   if (d.dlang){ dLang = d.dlang; render(); return; }
-  if ('gemtoggle' in d){ dGem = !dGem; render(); return; }
+  if ('gemtoggle' in d){ dGem = !dGem; render(); window.scrollTo(0, 0); return; }
   if (d.country){ country = d.country; render(); return; }
-  if (d.follow !== undefined){ followOutlet(OUTLETS[+d.follow]); save(); keepScroll(render); return; }
+  if (d.follow !== undefined){ e.stopPropagation(); const o = OUTLETS[+d.follow];
+    if (followed(o.url)){ S.sources = S.sources.filter(s => s.url !== o.url); toast(`Deixaste de seguir ${o.name}`); } else followOutlet(o);
+    save(); const pos = [...document.querySelectorAll('.pager,.featc,.sq-row,.nets,.flagrow')].map(el => el.scrollLeft); keepScroll(render);
+    [...document.querySelectorAll('.pager,.featc,.sq-row,.nets,.flagrow')].forEach((el, i) => el.scrollLeft = pos[i] || 0); return; }
   if (d.followcc){ let n = 0; d.ids.split(',').forEach(i => { if (followOutlet(OUTLETS[+i], true)) n++; }); save(); keepScroll(render); toast(`${flag(d.followcc)} A seguir ${n} jornais de ${cname(d.followcc)}`); return; }
   if (d.gnews){ const u = gnewsUrl(d.gnews); if (followed(u)) { toast('Já segues estas manchetes'); return; } S.sources.push({ id: uid(), name: `Manchetes · ${cname(d.gnews)}`, url: u, cc: d.gnews, color: PALETTE[S.sources.length % PALETTE.length] }); save(); keepScroll(render); toast(`${flag(d.gnews)} A seguir as manchetes de ${cname(d.gnews)}`); return; }
   if (d.tc){ S.settings.tq = $('#tq').value.trim(); S.settings.tc = d.tc; save(); keepScroll(render); return; }
@@ -1508,6 +1662,10 @@ document.addEventListener('input', e => {
   if (e.key === undefined && false){}
   if (e.target.id === 'tq'){ S.settings.tq = e.target.value; const b = $('#followTopic'); if (b) b.textContent = `Seguir “${e.target.value || '…'}” em ${flag(S.settings.tc || 'PT')} ${cname(S.settings.tc || 'PT')}`; }
 });
+document.addEventListener('scroll', e => { const el = e.target; if (!el.dataset || !el.dataset.dots) return;
+  const dots = document.getElementById(el.dataset.dots); if (!dots) return;
+  const w = el.firstElementChild ? el.firstElementChild.getBoundingClientRect().width + 12 : el.clientWidth;
+  const i = Math.round(el.scrollLeft / w); [...dots.children].forEach((d, k) => d.classList.toggle('on', k === i)); }, true);
 function keepScroll(fn){ const y = window.scrollY; fn(); window.scrollTo(0, y); }
 $('#q').addEventListener('input', e => { query = e.target.value.trim(); tab = 'hoje'; render(); });
 
