@@ -342,6 +342,26 @@ body::before{content:"";position:fixed;top:0;left:0;right:0;height:var(--st);bac
 .themes button span{font-size:15px;filter:grayscale(1);opacity:.7;transition:all .2s}
 .themes button.on{background:var(--card);color:var(--ink);box-shadow:var(--shadow)}
 .themes button.on span{filter:none;opacity:1}
+
+/* v9 — página do canal */
+.chl{cursor:pointer}
+.src .chl{display:inline-flex;align-items:center;gap:6px;min-width:0}
+.rmeta .chl{display:inline-flex;align-items:center;gap:6px;color:var(--ink)}
+.chan{position:fixed;inset:0;background:var(--bg);z-index:19;overflow-y:auto;transform:translateX(100%);transition:transform .32s cubic-bezier(.2,.8,.2,1)}
+.chan.open{transform:none}
+.cban{height:calc(150px + var(--st));position:relative;overflow:hidden}
+.cban .grain{position:absolute;inset:0;opacity:.25;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.cban::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.25),transparent 45%,var(--bg))}
+.cbar{position:absolute;z-index:2;left:0;right:0;top:var(--st);display:flex;justify-content:space-between;padding:10px 14px}
+.cbar .ibtn{background:rgba(0,0,0,.28);color:#fff;backdrop-filter:blur(10px);box-shadow:none}
+.cwrap{max-width:680px;margin:0 auto;padding:0 18px calc(110px + var(--sb));position:relative}
+.clogo{width:86px;height:86px;border-radius:50%;margin-top:-52px;position:relative;z-index:2;overflow:hidden;display:grid;place-items:center;color:#fff;font-family:Newsreader,serif;font-size:40px;border:4px solid var(--bg);box-shadow:var(--shadow)}
+.clogo img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff;padding:14px}
+.cwrap h1{font-family:Manrope,sans-serif;font-weight:800;font-size:32px;letter-spacing:-.8px;margin:12px 0 4px;line-height:1.1}
+.cmeta{color:var(--muted);font-size:13.5px;font-weight:600}
+.cdesc{color:var(--ink2);font-size:14.5px;margin:10px 0 0;line-height:1.45}
+.cact{display:flex;gap:8px;margin:16px 0 6px}
+.cact .btn{padding:11px 18px;border-radius:99px;font-size:14px}
 </style>
 </head>
 <body>
@@ -365,6 +385,7 @@ body::before{content:"";position:fixed;top:0;left:0;right:0;height:var(--st);bac
   <button data-tab="biblioteca"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"/></svg>Biblioteca</button>
 </nav>
 
+<div class="chan" id="chan"><div id="chanIn"></div></div>
 <div class="reader" id="reader">
   <div class="progress"><i id="prog"></i></div>
   <div class="rbar">
@@ -698,7 +719,8 @@ async function refreshAll(silent){
 /* ================= Helpers UI ================= */
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
-const src = id => S.sources.find(s => s.id === id) || { name: 'Artigo colado', color: '#8b8693' };
+const src = id => S.sources.find(s => s.id === id) || (chan && chan.src.id === id && chan.src) || (S.ghosts || []).find(s => s.id === id) || { name: 'Artigo colado', color: '#8b8693' };
+const findArt = id => S.articles.find(x => x.id === id) || pool.find(x => x.id === id);
 const ago = t => { const m = (Date.now() - t) / 6e4; if (m < 60) return `há ${Math.max(1, Math.round(m))} min`; if (m < 1440) return `há ${Math.round(m / 60)} h`; const d = Math.round(m / 1440); return d === 1 ? 'ontem' : `há ${d} dias`; };
 const grad = (c, seed = 0) => `background:radial-gradient(120% 90% at ${20 + seed % 60}% 10%, ${c} 0%, transparent 60%), radial-gradient(100% 100% at 100% 100%, ${shade(c, -40)} 0%, transparent 70%), linear-gradient(135deg, ${shade(c, 20)}, ${shade(c, -55)})`;
 function shade(hex, p){ const n = parseInt(hex.slice(1), 16); let r = n >> 16, g = n >> 8 & 255, b = n & 255; const f = v => Math.max(0, Math.min(255, Math.round(v + (p / 100) * (p > 0 ? 255 - v : v)))); return '#' + [f(r), f(g), f(b)].map(v => v.toString(16).padStart(2, '0')).join(''); }
@@ -721,7 +743,7 @@ function artCard(a){
   const top = r.matched[0];
   return `<div class="erow fade ${S.read[a.id] ? 'read' : ''}" data-open="${a.id}">
     <div class="etext">
-      <div class="src"><span class="dot" style="background:${s.color}"></span>${s.cc ? `<span class="fl">${flag(s.cc)}</span>` : ''}${esc(s.name)}<span class="when">${ago(a.date)}</span></div>
+      <div class="src"><span class="chl" ${a.sourceId ? `data-chan="${a.sourceId}"` : ''}><span class="dot" style="background:${s.color}"></span>${s.cc ? `<span class="fl">${flag(s.cc)}</span>` : ''}${esc(s.name)}</span><span class="when">${ago(a.date)}</span></div>
       <h3>${esc(a.title)}</h3>
       <div class="foot">
         ${top ? `<span class="why ${top.prio ? 'prio' : ''}">${top.prio ? '⚡' : '✦'} ${esc(top.text)}</span>` : `<span>${readMin(a.content)} min de leitura</span>`}
@@ -736,7 +758,7 @@ function miniCard(x){
   const s = src(x.a.sourceId);
   return `<div class="mcard" data-open="${x.a.id}">
     <div class="mcover" style="${grad(s.color, hash(x.a.id))}">${x.a.image ? `<img src="${esc(x.a.image)}" alt="" onerror="this.remove()">` : `<span>${esc(s.name[0])}</span>`}</div>
-    <div class="mbody"><div class="src"><span class="dot" style="background:${s.color}"></span>${esc(s.name)}</div><b>${esc(x.a.title)}</b></div>
+    <div class="mbody"><div class="src chl" data-chan="${x.a.sourceId}"><span class="dot" style="background:${s.color}"></span>${esc(s.name)}</div><b>${esc(x.a.title)}</b></div>
   </div>`;
 }
 function groupBy(list){
@@ -762,8 +784,8 @@ let fsub = 'descobrir', dRegion = 'all', dLang = 'all', dGem = false, dQuery = '
 const followed = url => S.sources.some(s => s.url === url);
 function outletRow(o){
   return `<div class="orow">
-    <div class="av" style="background:${TYPE_COLOR[o.type] || '#888'}">${esc(o.name[0])}</div>
-    <div class="grow">
+    <div class="av" data-outlet="${OUTLETS.indexOf(o)}" style="background:${TYPE_COLOR[o.type] || '#888'}">${esc(o.name[0])}</div>
+    <div class="grow chl" data-outlet="${OUTLETS.indexOf(o)}">
       <b>${esc(o.name)} ${o.gem ? '<span class="gem" title="Joia escondida">💎</span>' : ''}</b>
       <p>${esc(o.desc)}</p>
       <div class="otags">${o.cats.map(c => `<span class="ct">${CATS[c]}</span>`).join('')}<span>${o.type}</span><span>${LANGS[o.lang] || o.lang}</span></div>
@@ -849,8 +871,8 @@ function followingView(){
   return `
     <div class="inline" style="margin-top:6px"><input id="srcUrl" placeholder="Cola um link RSS (ex.: site.pt/feed)" inputmode="url"><button class="btn acc" id="addSrc">Seguir</button></div>
     <div class="rows" style="margin-top:12px">${S.sources.length ? S.sources.map(s => `
-      <div class="rowi"><div class="av" style="${grad(s.color)}">${esc(s.name[0])}</div>
-        <div class="grow"><b>${s.cc ? flag(s.cc) + ' ' : ''}${esc(s.name)}</b><small>${esc(s.url)}</small></div>
+      <div class="rowi"><div class="av" data-chan="${s.id}" style="${grad(s.color)}">${esc(s.name[0])}</div>
+        <div class="grow chl" data-chan="${s.id}"><b>${s.cc ? flag(s.cc) + ' ' : ''}${esc(s.name)}</b><small>${esc(s.url)}</small></div>
         <span class="pill">${S.articles.filter(a => a.sourceId === s.id).length}</span>
         <button class="x" data-delsrc="${s.id}" title="Deixar de seguir">×</button></div>`).join('') : '<div class="empty">Ainda não segues nenhum feed. Vai a 🌍 Descobrir.</div>'}
     </div>
@@ -965,13 +987,75 @@ function themeOf(a){
   themeCache.set(a.id, t); return t;
 }
 
+
+/* ================= Página do canal ================= */
+let chan = null, pool = [], chanMode = 'recentes';
+const hostOf = u => { try { return new URL(u).hostname.replace(/^(www|feeds?|rss|newsfeed|services|e00-[\w]+)\./, ''); } catch(e){ return ''; } };
+function openChannel(sid){
+  const s = S.sources.find(x => x.id === sid) || (S.ghosts || []).find(x => x.id === sid); if (!s) return;
+  chan = { src: s, preview: false, state: 'ok' }; pool = []; chanMode = 'recentes'; showChan();
+}
+function openOutlet(i){
+  const o = OUTLETS[i]; const f = S.sources.find(s => s.url === o.url);
+  if (f) return openChannel(f.id);
+  const s = { id: uid(), name: o.name, url: o.url, cc: o.cc, lang: o.lang, cats: o.cats, desc: o.desc, color: TYPE_COLOR[o.type] === '#16141b' ? PALETTE[i % PALETTE.length] : TYPE_COLOR[o.type] };
+  chan = { src: s, preview: true, state: 'loading' }; pool = []; chanMode = 'recentes'; showChan();
+  fetchFeed(s).then(r => { pool = r.items; chan.state = pool.length ? 'ok' : 'empty'; renderChan(); }).catch(() => { chan.state = 'offline'; renderChan(); });
+}
+function showChan(){ renderChan(); const c = $('#chan'); c.scrollTop = 0; c.classList.add('open'); document.body.style.overflow = 'hidden'; }
+function closeChan(){ $('#chan').classList.remove('open'); document.body.style.overflow = ''; chan = null; pool = []; render(); }
+function renderChan(){
+  if (!chan) return;
+  const s = chan.src, dom = hostOf(s.url.includes('news.google.') ? '' : s.url);
+  let arts = chan.preview ? [...pool] : S.articles.filter(a => a.sourceId === s.id);
+  arts.sort(chanMode === 'parati' ? (a, b) => analyse(b).score - analyse(a).score || b.date - a.date : (a, b) => b.date - a.date);
+  const isF = S.sources.some(x => x.id === s.id);
+  const cats = srcCats(s).filter(c => c !== 'geral').map(c => CATS[c]);
+  const o = OUTLETS.find(x => x.url === s.url);
+  const body = chan.state === 'loading' ? '<div class="wload" style="padding:40px"><i></i><i></i><i></i></div>'
+    : chan.state === 'offline' ? `<div class="empty"><div class="big">📡</div>${isApp ? 'Não consegui carregar as notícias deste canal agora.' : 'No protótipo a internet está bloqueada. No app instalado, aqui aparecem as últimas notícias do canal antes de o seguires.'}</div>`
+    : !arts.length ? `<div class="empty"><div class="big">🗞️</div>Ainda não há notícias deste canal.<br>Toca em ↻ para atualizar.</div>`
+    : `<div class="elist">${arts.map(artCard).join('')}</div>`;
+  $('#chanIn').innerHTML = `
+    <div class="cban" style="${grad(s.color, hash(s.name))}"><div class="grain"></div>
+      <div class="cbar"><button class="ibtn" data-chanclose title="Voltar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <button class="ibtn" data-chanrefresh title="Atualizar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5"/></svg></button></div>
+    </div>
+    <div class="cwrap">
+      <div class="clogo" style="${grad(s.color, 7)}">${esc(s.name[0])}${dom ? `<img src="https://www.google.com/s2/favicons?domain=${esc(dom)}&sz=128" alt="" onerror="this.remove()">` : ''}</div>
+      <h1>${esc(s.name)}</h1>
+      <div class="cmeta">${s.cc ? `${flag(s.cc)} ${cname(s.cc)}` : ''}${cats.length ? ' · ' + cats.join(', ') : ''}${!chan.preview || chan.state === 'ok' ? ` · ${arts.length} ${arts.length === 1 ? 'notícia' : 'notícias'}` : ''}</div>
+      ${(s.desc || o?.desc) ? `<p class="cdesc">${esc(s.desc || o.desc)}</p>` : ''}
+      <div class="cact">
+        ${isF ? '<button class="btn soft" data-chanfollow>✓ A seguir</button>' : '<button class="btn acc" data-chanfollow>＋ Seguir canal</button>'}
+        ${dom ? `<a class="btn soft" href="https://${esc(dom)}" target="_blank" rel="noopener" style="text-decoration:none">Abrir site ↗</a>` : ''}
+      </div>
+      <div class="seg"><button data-chanmode="recentes" class="${chanMode === 'recentes' ? 'on' : ''}">Mais recentes</button><button data-chanmode="parati" class="${chanMode === 'parati' ? 'on' : ''}">Para ti</button></div>
+      ${body}
+    </div>`;
+}
+async function chanRefresh(){
+  if (!chan) return; const s = chan.src; toast('A atualizar ' + s.name + '…');
+  try { const r = await fetchFeed(s);
+    if (chan.preview || !S.sources.some(x => x.id === s.id)){ pool = r.items; chan.state = 'ok'; }
+    else { const n = addItems(r.items); save(); toast(n ? `${n} notícias novas` : 'Já estás em dia'); }
+  } catch(e){ toast(isApp ? 'Sem ligação a este canal.' : 'No protótipo a internet está bloqueada.'); }
+  renderChan();
+}
+function chanFollow(){
+  const s = chan.src;
+  if (S.sources.some(x => x.id === s.id)){ S.sources = S.sources.filter(x => x.id !== s.id); toast(`Deixaste de seguir ${s.name}`); chan.preview = true; pool = S.articles.filter(a => a.sourceId === s.id); }
+  else { S.sources.push(s); S.ghosts = (S.ghosts || []).filter(x => x.id !== s.id); if (pool.length) addItems(pool); chan.preview = false; pool = []; toast(`${s.cc ? flag(s.cc) + ' ' : ''}A seguir ${s.name}`); }
+  save(); renderChan();
+}
+
 /* ================= Vistas ================= */
 let tab = 'hoje', filter = 'all', mode = 'parati', libMode = 'guardados', query = '';
 
 const views = {
   hoje(){
     const theme = S.settings.cat || 'all';
-    let list = S.articles.filter(a => !isMuted(a)).map(a => ({ a, r: analyse(a) }));
+    let list = S.articles.filter(a => !isMuted(a) && (!a.sourceId || S.sources.some(s => s.id === a.sourceId))).map(a => ({ a, r: analyse(a) }));
     if (query){ const q = norm(query); list = list.filter(x => norm(x.a.title + ' ' + x.a.content).includes(q)); }
     const top = [...list].filter(x => !S.read[x.a.id] && (theme === 'all' || themeOf(x.a) === theme)).sort((x, y) => y.r.score - x.r.score || y.a.date - x.a.date);
     if (theme !== 'all') list = list.filter(x => themeOf(x.a) === theme);
@@ -997,7 +1081,7 @@ const views = {
         <div class="hero-top"><span class="tag">✦ Escolhido para ti${theme !== 'all' ? ' · ' + thName[1] : ''}</span><span class="tag ghost">${readMin(hero.a.content)} min</span></div>
         <h3>${esc(hero.a.title)}</h3>
         <p>${esc(analyse(hero.a).summary[0] || '')}</p>
-        <div class="hero-src">${hs.cc ? flag(hs.cc) : '<span class="dot" style="background:#fff"></span>'} ${esc(hs.name)} · ${ago(hero.a.date)}</div>
+        <div class="hero-src chl" data-chan="${hero.a.sourceId}">${hs.cc ? flag(hs.cc) : '<span class="dot" style="background:#fff"></span>'} ${esc(hs.name)} · ${ago(hero.a.date)}</div>
       </div>` : ''}
     ${picks.length ? `
       <div class="sec"><h2>Também para ti</h2></div>
@@ -1090,11 +1174,11 @@ function paragraphs(t){
   const s = sentences(t), out = []; for (let i = 0; i < s.length; i += 3) out.push(s.slice(i, i + 3).join(' ')); return out;
 }
 function openReader(id){
-  const a = S.articles.find(x => x.id === id); if (!a) return;
+  const a = findArt(id); if (!a) return;
   current = id; S.read[id] = S.read[id] || Date.now(); save(); stopSpeak();
   const r = analyse(a), s = src(a.sourceId);
   const hls = S.highlights.filter(h => h.articleId === id);
-  const related = S.articles.filter(x => x.id !== id && analyse(x).matched.some(m => r.matched.some(n => n.id === m.id))).slice(0, 5);
+  const related = (pool.some(x => x.id === id) ? pool : S.articles).filter(x => x.id !== id && analyse(x).matched.some(m => r.matched.some(n => n.id === m.id))).slice(0, 5);
   $('#rActions').innerHTML = `
     <button class="ibtn" id="speakBtn" title="Ouvir">${ICON.play}</button>
     <button class="ibtn" id="sizeBtn" title="Tamanho do texto">${ICON.aa}</button>
@@ -1102,7 +1186,7 @@ function openReader(id){
     <button class="ibtn" data-save="${id}" style="color:${S.saved[id] ? 'var(--accent)' : 'inherit'}" title="Guardar">${S.saved[id] ? ICON.bmOn : ICON.bm}</button>`;
   $('#rwrap').innerHTML = `
     <div class="rcover" style="${grad(s.color, hash(a.id))}">${a.image ? `<img src="${esc(a.image)}" alt="" onerror="this.remove()">` : ''}</div>
-    <div class="rmeta"><span class="dot" style="background:${s.color}"></span>${esc(s.name)} <span style="color:var(--muted)">· ${ago(a.date)} · ${readMin(a.content)} min</span>${r.score ? `<span class="ring" style="--p:${r.score};margin-left:auto" data-v="${r.score}"></span>` : ''}</div>
+    <div class="rmeta"><span class="chl" ${a.sourceId ? `data-chan="${a.sourceId}"` : ''}><span class="dot" style="background:${s.color}"></span> ${esc(s.name)} ›</span> <span style="color:var(--muted)">· ${ago(a.date)} · ${readMin(a.content)} min</span>${r.score ? `<span class="ring" style="--p:${r.score};margin-left:auto" data-v="${r.score}"></span>` : ''}</div>
     <h1>${esc(a.title)}</h1>
     ${r.matched.length ? `<div class="tags">${r.matched.map(m => `<span class="tg ${m.prio ? 'prio' : ''}">${m.prio ? '⚡ ' : '✦ '}${esc(m.text)}</span>`).join('')}</div>` : ''}
     <div class="box sum"><h4>${ICON.clock.replace('<svg', '<svg width="15"')} Em 30 segundos</h4><ul>${r.summary.map(x => `<li>${markText(x, r.allK, [])}</li>`).join('')}</ul></div>
@@ -1114,13 +1198,13 @@ function openReader(id){
   const rd = $('#reader'); rd.classList.add('open'); rd.scrollTop = 0; $('#prog').style.width = '0';
   document.body.style.overflow = 'hidden';
 }
-function closeReader(){ $('#reader').classList.remove('open'); document.body.style.overflow = ''; stopSpeak(); current = null; $('#hlBtn').classList.remove('show'); render(); }
+function closeReader(){ $('#reader').classList.remove('open'); if (!chan) document.body.style.overflow = ''; stopSpeak(); current = null; $('#hlBtn').classList.remove('show'); render(); if (chan) renderChan(); }
 $('#reader').addEventListener('scroll', e => { const el = e.target; $('#prog').style.width = (el.scrollTop / Math.max(1, el.scrollHeight - el.clientHeight) * 100) + '%'; });
 
 function speak(){
   try {
     if (speaking){ stopSpeak(); return; }
-    const a = S.articles.find(x => x.id === current); if (!a || !window.speechSynthesis) throw 0;
+    const a = findArt(current); if (!a || !window.speechSynthesis) throw 0;
     const u = new SpeechSynthesisUtterance(a.title + '. ' + a.content.replace(/\n+/g, ' '));
     u.lang = 'pt-PT'; u.rate = 1; u.onend = stopSpeak;
     speechSynthesis.speak(u); speaking = true; $('#speakBtn').style.color = 'var(--accent)'; toast('A ler em voz alta… toca outra vez para parar');
@@ -1211,16 +1295,23 @@ function addSource(url, name, color, cc, lang){
 /* ================= Eventos ================= */
 document.addEventListener('click', e => {
   if (e.target.id === 'modal'){ closeSheet(); return; }
-  const t = e.target.closest('[data-tab],[data-f],[data-mode],[data-lib],[data-open],[data-save],[data-md],[data-close-reader],[data-delsrc],[data-delint],[data-prio],[data-unmute],[data-delhl],[data-addfeed],[data-addcat],[data-fsub],[data-theme-tab],[data-gotheme],[data-dcat],[data-websearch],[data-webfollow],[data-region],[data-dlang],[data-gemtoggle],[data-follow],[data-followcc],[data-gnews],[data-tc],[data-tsug],[data-country],[data-theme-set],[data-size],button');
+  const t = e.target.closest('[data-tab],[data-f],[data-mode],[data-lib],[data-open],[data-save],[data-md],[data-close-reader],[data-delsrc],[data-delint],[data-prio],[data-unmute],[data-delhl],[data-addfeed],[data-addcat],[data-fsub],[data-chan],[data-outlet],[data-chanclose],[data-chanrefresh],[data-chanfollow],[data-chanmode],[data-theme-tab],[data-gotheme],[data-dcat],[data-websearch],[data-webfollow],[data-region],[data-dlang],[data-gemtoggle],[data-follow],[data-followcc],[data-gnews],[data-tc],[data-tsug],[data-country],[data-theme-set],[data-size],button');
   if (!t) return;
   const d = t.dataset;
-  if (d.save){ e.stopPropagation(); S.saved[d.save] ? delete S.saved[d.save] : S.saved[d.save] = Date.now(); save(); toast(S.saved[d.save] ? '🔖 Guardado na Biblioteca' : 'Removido dos guardados'); if (current) { const top = $('#reader').scrollTop; openReader(current); $('#reader').scrollTop = top; } else render(); return; }
+  if (d.chan){ e.stopPropagation(); if (current) closeReader(); openChannel(d.chan); return; }
+  if (d.outlet !== undefined){ openOutlet(+d.outlet); return; }
+  if ('chanclose' in d){ closeChan(); return; }
+  if ('chanrefresh' in d){ chanRefresh(); return; }
+  if ('chanfollow' in d){ chanFollow(); return; }
+  if (d.chanmode){ chanMode = d.chanmode; renderChan(); return; }
+  if (d.save && !S.articles.some(a => a.id === d.save)){ const a = pool.find(x => x.id === d.save); if (a){ S.articles.push(a); if (!S.sources.some(s => s.id === a.sourceId)){ S.ghosts = S.ghosts || []; if (!S.ghosts.some(s => s.id === a.sourceId)) S.ghosts.push(chan.src); } } }
+  if (d.save){ e.stopPropagation(); S.saved[d.save] ? delete S.saved[d.save] : S.saved[d.save] = Date.now(); save(); toast(S.saved[d.save] ? '🔖 Guardado na Biblioteca' : 'Removido dos guardados'); if (current) { const top = $('#reader').scrollTop; openReader(current); $('#reader').scrollTop = top; } else { render(); if (chan) renderChan(); } return; }
   if (d.open){ openReader(d.open); return; }
   if (d.tab){ tab = d.tab; query = ''; $('#q').value = ''; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
   if (d.f){ filter = d.f; render(); return; }
   if (d.mode){ mode = d.mode; render(); return; }
   if (d.lib){ libMode = d.lib; render(); return; }
-  if (d.md){ copy(toMd(S.articles.find(a => a.id === d.md))); return; }
+  if (d.md){ copy(toMd(findArt(d.md))); return; }
   if ('closeReader' in d){ closeReader(); return; }
   if (d.delsrc){ const s = S.sources.find(x => x.id === d.delsrc); S.sources = S.sources.filter(x => x.id !== d.delsrc); save(); render(); toast(`Deixaste de seguir ${s?.name}`); return; }
   if (d.delint){ S.interests = S.interests.filter(i => i.id !== d.delint); if (filter === d.delint) filter = 'all'; save(); render(); return; }
@@ -1278,7 +1369,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && e.target.id === 'tq') $('#followTopic').click();
   if (e.key === 'Enter' && e.target.id === 'dq' && dQuery.trim().length >= 2) webSearch(dQuery.trim());
   if (e.key === 'Enter' && map[e.target.id]) $('#' + map[e.target.id]).click();
-  if (e.key === 'Escape'){ if ($('#modal').classList.contains('open')) closeSheet(); else if (current) closeReader(); }
+  if (e.key === 'Escape'){ if ($('#modal').classList.contains('open')) closeSheet(); else if (current) closeReader(); else if (chan) closeChan(); }
 });
 document.addEventListener('input', e => {
   if (e.target.id === 'dq'){ dQuery = e.target.value; const r = $('#discRes'); if (r) r.innerHTML = discResults(); }
