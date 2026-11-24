@@ -668,6 +668,7 @@ function load(){
   for (const k of ['read','saved','later']) S[k] ||= {};
   S.highlights ||= []; S.muted ||= []; S.settings ||= { theme: 'auto', size: 19 };
   prune();
+  if ((S.cleanV || 0) < CLEAN_V){ S.articles.forEach(a => { a.content = cleanText(a.content); }); S.cleanV = CLEAN_V; save(); }
 }
 // guardar com atraso: juntar várias alterações numa só escrita (evita travões)
 let saveT = null;
@@ -692,7 +693,7 @@ const stem = w => w.length < 5 ? w : w.replace(/coes$/, 'cao').replace(/oes$/, '
 const words = t => norm(t).split(/[^a-z0-9]+/).filter(Boolean);
 const keywords = t => [...new Set(words(t).filter(w => w.length > 3 && !STOP.has(w)).map(stem))];
 const hits = (t, kws) => { const ws = words(t).map(stem); return kws.filter(k => ws.some(w => w.startsWith(k))); };
-const sentences = t => t.replace(/\n+/g, ' ').split(/(?<=[.!?])\s+/).map(s => s.trim()).filter(s => s.length > 20);
+const sentences = t => t.replace(/\n+/g, ' ').split(/(?<=[.!?])\s+/).map(s => s.trim()).filter(s => s.length > 20 && !isJunk(s) && !JUNK_TAIL.test(s));
 const readMin = t => Math.max(1, Math.round(words(t).length / 220));
 const normCache = new Map();
 const normText = a => { let v = normCache.get(a.id); if (v === undefined || v.l !== a.content.length){ v = { t: norm(a.title + ' ' + a.content), l: a.content.length }; normCache.set(a.id, v); } return v.t; };
@@ -722,6 +723,23 @@ function analyse(a){
   cache.set(ck, r); return r;
 }
 
+
+/* ================= Limpeza do texto: publicidade e "leia mais" ================= */
+// Linhas inteiras que são publicidade, chamadas para outras notícias ou pedidos para seguir/assinar
+const JUNK_LINE = /^(publicidade|publicidad|pub\.?|advertisement|advertising|ad|anúncio|anuncio|patrocinado|conte[úu]do patrocinado|sponsored( content)?|promo(ção|cao)?|continua (após a|apos a|depois da) publicidade|continue (a ler|lendo) (após a|apos a|depois da) publicidade|a not[íi]cia continua (após a|apos a|depois da) publicidade|(artigo|texto|mat[ée]ria) continua (após a|apos a|depois da|abaixo da) publicidade|leia (também|tambem|mais)|ler (também|tambem|mais)|veja (também|tambem|mais)|vê também|saiba mais|read more|continue reading|related( articles| stories)?|relacionad[oa]s?|mais lidas|recomendado para (si|você|voce)|siga[- ]nos|segue[- ]nos|siga o|acompanhe (o|a|nos)|subscreva|assine|inscreva-se|receba (as|a) (not[íi]cias|newsletter)|newsletter|clique (aqui|no link)|toque aqui|partilhe|compartilhe|share( this)?|follow us|subscribe|sign up|download (the|our) app|baixe o app|descarregue a app)\b/i;
+// Restos no fim de um parágrafo: "Leia mais", "[…]", "The post … appeared first on …"
+const JUNK_TAIL = /\s*(\[\s*(…|\.\.\.|&hellip;)\s*\]|(…|\.\.\.)\s*(leia mais|ler mais|continue lendo|continuar a ler|read more|saiba mais|ver mais|mais informa[çc][õo]es)|(leia mais|ler mais|continue lendo|continuar a ler|continue reading|read more|saiba mais|ver mais|clique (aqui|para ler)[^.]*)\s*[.:»›→>]*)\s*$/i;
+const JUNK_ANY = /(the post .{1,200} appeared first on .{1,120}|o post .{1,200} apareceu primeiro em .{1,120}|this (article|story) (was )?originally (appeared|published) on .{1,120})\.?\s*$/i;
+const isJunk = p => { const t = p.trim(); return !t || (t.length < 140 && JUNK_LINE.test(t)) || /^[\s\W]*$/.test(t); };
+function cleanText(text){
+  return (text || '').split(/\n{2,}|\n/)
+    .map(p => p.trim().replace(JUNK_ANY, '').replace(JUNK_TAIL, '').trim())
+    // dentro do parágrafo: tirar frases curtas que são só chamadas ("Saiba mais no nosso site.", "Siga-nos…")
+    .map(p => p.split(/(?<=[.!?»])\s+/).filter(s => !isJunk(s)).join(' ').replace(JUNK_TAIL, '').trim())
+    .filter(p => !isJunk(p)).join('\n\n');
+}
+const CLEAN_V = 1;
+
 /* ================= RSS ================= */
 function htmlToText(h){
   const d = document.createElement('div');
@@ -740,7 +758,7 @@ function parseFeed(xmlText, src){
     const link = linkEl?.getAttribute('href') || linkEl?.textContent || '';
     const enc = it.getElementsByTagName('enclosure')[0]?.getAttribute('url') || it.getElementsByTagName('media:content')[0]?.getAttribute('url') || it.getElementsByTagName('media:thumbnail')[0]?.getAttribute('url') || '';
     const d = Date.parse(g('pubDate') || g('updated') || g('published') || g('dc:date'));
-    return { id: uid(), sourceId: src.id, title: htmlToText(g('title')), url: link.trim(), date: isNaN(d) ? Date.now() : d, content: htmlToText(raw), image: enc || firstImg(raw) };
+    return { id: uid(), sourceId: src.id, title: htmlToText(g('title')), url: link.trim(), date: isNaN(d) ? Date.now() : d, content: cleanText(htmlToText(raw)), image: enc || firstImg(raw) };
   }).filter(a => a.title);
   return { title, items };
 }
@@ -1393,7 +1411,7 @@ async function loadFull(id){
 function extractArticle(html, base){
   const doc = new DOMParser().parseFromString(html, 'text/html');
   const image = doc.querySelector('meta[property="og:image"]')?.content || '';
-  doc.querySelectorAll('script,style,noscript,nav,header,footer,aside,form,iframe,svg,button,.share,.social,.related,.newsletter,.comments,[class*="advert"],[class*="banner"],[id*="comment"]').forEach(n => n.remove());
+  doc.querySelectorAll('script,style,noscript,nav,header,footer,aside,form,iframe,svg,button,ins,figcaption,.share,.social,.related,.newsletter,.comments,[class*="advert"],[class*="banner"],[class*="publicidade"],[class*="publicidad"],[class*="sponsor"],[class*="patrocin"],[class*="promo"],[class*="outbrain"],[class*="taboola"],[class*="read-more"],[class*="readmore"],[class*="leia-mais"],[class*="leia-tambem"],[class*="saiba-mais"],[class*="recommend"],[class*="paywall"],[id*="comment"],[id*="ad-"],[id^="ad"],[class^="ad-"],[class*=" ad-"],[class*="ads"],[data-ad],[aria-label*="ublicidade"],[aria-label*="dvertisement"]').forEach(n => n.remove());
   let best = doc.querySelector('article'), bestScore = 0;
   const score = el => [...el.querySelectorAll(':scope > p, :scope > div > p, :scope > section > p')].reduce((s, p) => s + Math.min(p.textContent.trim().length, 600), 0);
   if (best) bestScore = score(best) * 1.3;
@@ -1407,7 +1425,7 @@ function extractArticle(html, base){
     if (el.tagName === 'LI' && el.closest('nav, ul.menu')) return;
     out.push(t);
   });
-  return { text: out.join('\n\n'), image };
+  return { text: cleanText(out.join('\n\n')), image };
 }
 // artigo anterior/seguinte na lista que estavas a ver
 let readingList = [];
